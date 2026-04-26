@@ -215,7 +215,7 @@
 					{#if selected.image}
 						<div style="position:relative;max-width:100%;max-height:100%;display:flex;filter:{imageFilter}">
 							<img
-								src={urlFor(selected.image).width(1440).auto('format').url()}
+								src={urlFor(selected.image).width(1200).auto('format').url()}
 								alt={pickLocale(lang, selected.title)}
 								style="max-width:100%;max-height:100%;width:auto;height:auto;display:block;object-fit:contain"
 							/>

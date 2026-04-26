@@ -36,14 +36,26 @@ export default defineConfig({
 				navigateFallback: null,
 				runtimeCaching: [
 					{
-						urlPattern: /^https:\/\/cdn\.sanity\.io\/.*/i,
+						// Sanity image CDN
+						urlPattern: /^https:\/\/cdn\.sanity\.io\/images\/.*/i,
 						handler: 'CacheFirst',
 						options: {
 							cacheName: 'sanity-images',
-							expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 }
+							expiration: { maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 30 }
 						}
 					},
 					{
+						// Sanity file CDN (audio, PDFs, etc.)
+						urlPattern: /^https:\/\/cdn\.sanity\.io\/files\/.*/i,
+						handler: 'CacheFirst',
+						options: {
+							cacheName: 'sanity-audio',
+							expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
+							rangeRequests: true
+						}
+					},
+					{
+						// Sanity GROQ API
 						urlPattern: /^https:\/\/[a-z0-9]+\.api\.sanity\.io\/.*/i,
 						handler: 'NetworkFirst',
 						options: {
