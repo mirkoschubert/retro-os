@@ -114,5 +114,10 @@ export function getMessages(locale: Locale) {
 		palette_close: () => m.palette_close({}, o),
 		about_title: () => m.about_title({}, o),
 		about_version: () => m.about_version({}, o),
+		legal_title: () => m.legal_title({}, o),
+		legal_impressum: () => m.legal_impressum({}, o),
+		legal_datenschutz: () => m.legal_datenschutz({}, o),
+		menu_impressum: () => m.menu_impressum({}, o),
+		menu_datenschutz: () => m.menu_datenschutz({}, o),
 	};
 }

@@ -100,5 +100,10 @@
   "palette_open": "öffnen",
   "palette_close": "schließen",
   "about_title": "Über dieses System",
-  "about_version": "RetroOS v11.4 - Graphit"
+  "about_version": "RetroOS v11.4 - Graphit",
+  "legal_title": "Rechtliches",
+  "legal_impressum": "Impressum",
+  "legal_datenschutz": "Datenschutz",
+  "menu_impressum": "Impressum",
+  "menu_datenschutz": "Datenschutz"
 }

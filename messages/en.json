@@ -100,5 +100,10 @@
   "palette_open": "open",
   "palette_close": "close",
   "about_title": "About this system",
-  "about_version": "RetroOS v11.4 - Charcoal"
+  "about_version": "RetroOS v11.4 - Charcoal",
+  "legal_title": "Legal",
+  "legal_impressum": "Imprint",
+  "legal_datenschutz": "Privacy Policy",
+  "menu_impressum": "Imprint",
+  "menu_datenschutz": "Privacy Policy"
 }

@@ -16,6 +16,7 @@
 	import SysInfo from '$lib/components/modules/SysInfo.svelte';
 	import Terminal from '$lib/components/modules/Terminal.svelte';
 	import About from '$lib/components/modules/About.svelte';
+	import Legal from '$lib/components/modules/Legal.svelte';
 	import type { Component } from 'svelte';
 	import type { PageData } from './$types';
 
@@ -114,6 +115,15 @@
 				x: 200, y: 80, w: 520, h: 380, minW: 360, minH: 240
 			},
 			{
+				id: 'legal',
+				title: 'Legal',
+				titleKey: 'legal_title',
+				component: Legal as unknown as Component<Record<string, unknown>>,
+				x: Math.max(60, viewportW / 2 - 250),
+				y: Math.max(50, viewportH / 2 - 210),
+				w: 500, h: 420, minW: 380, minH: 300
+			},
+			{
 				id: 'about',
 				title: 'About RetroOS',
 				titleKey: 'about_title',
@@ -125,13 +135,14 @@
 		];
 	}
 
-	function openModule(id: string) {
+	function openModule(id: string, extraProps?: Record<string, unknown>) {
 		const existing = wmStore.windows.find((w) => w.id === id);
 		if (existing) {
 			if (existing.minimized) {
 				wmStore.minimize(existing.id);
 			}
 			wmStore.focus(existing.id);
+			if (extraProps) wmStore.updateProps(existing.id, extraProps);
 			return;
 		}
 		const defs = getModuleDefs();
@@ -144,7 +155,8 @@
 			writings: data.writings,
 			photos: data.photos,
 			photoSeries: data.photoSeries,
-			albums: data.albums
+			albums: data.albums,
+			...extraProps
 		};
 
 		wmStore.open({

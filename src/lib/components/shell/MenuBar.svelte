@@ -9,7 +9,7 @@
 		time: string;
 		onSetLang: (lang: Lang) => void;
 		onSetEra: (era: Era) => void;
-		onOpenModule: (key: string) => void;
+		onOpenModule: (key: string, extraProps?: Record<string, unknown>) => void;
 		onOpenPalette: () => void;
 		onOpenConsole: () => void;
 		onOpenAbout: () => void;
@@ -114,6 +114,9 @@
 				{ divider: true },
 				{ row: t.cmd_palette(), shortcut: '⌘K', on: () => { openKey = null; onOpenPalette(); } },
 				{ row: t.console(), shortcut: '⌘.', on: () => { openKey = null; onOpenConsole(); } },
+				{ divider: true },
+				{ row: t.menu_impressum(), on: () => { openKey = null; onOpenModule('legal', { initialTab: 'impressum' }); } },
+				{ row: t.menu_datenschutz(), on: () => { openKey = null; onOpenModule('legal', { initialTab: 'datenschutz' }); } },
 				{ divider: true },
 				{ row: t.about_msos(), on: () => { openKey = null; onOpenAbout(); } }
 			]
