@@ -50,15 +50,9 @@ export default defineConfig({
 						}
 					},
 					{
-						// Sanity file CDN (audio, PDFs, etc.)
+						// Sanity file CDN (audio) — NetworkOnly so the browser handles Range requests natively
 						urlPattern: /^https:\/\/cdn\.sanity\.io\/files\/.*/i,
-						handler: 'CacheFirst',
-						options: {
-							cacheName: 'sanity-audio',
-							expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
-							rangeRequests: true,
-							cacheableResponse: { statuses: [0, 200] }
-						}
+						handler: 'NetworkOnly'
 					},
 					{
 						// Sanity GROQ API
