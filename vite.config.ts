@@ -2,6 +2,7 @@ import { defineConfig } from 'vitest/config';
 import { playwright } from '@vitest/browser-playwright';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { paraglideVitePlugin } from '@inlang/paraglide-js';
+import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
 	plugins: [
@@ -9,6 +10,49 @@ export default defineConfig({
 		paraglideVitePlugin({
 			project: './project.inlang',
 			outdir: './src/lib/paraglide'
+		}),
+		VitePWA({
+			registerType: 'autoUpdate',
+			strategies: 'generateSW',
+			injectRegister: 'auto',
+			manifest: {
+				name: 'RetroOS - Mirko Schubert',
+				short_name: 'RetroOS',
+				description: 'Personal portfolio of Mirko Schubert - a retro-inspired creative OS',
+				theme_color: '#1a1c20',
+				background_color: '#1a1c20',
+				display: 'standalone',
+				orientation: 'any',
+				scope: '/',
+				start_url: '/',
+				icons: [
+					{ src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+					{ src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+					{ src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
+				]
+			},
+			workbox: {
+				globPatterns: ['**/*.{js,css,html,svg,png,woff,woff2}'],
+				runtimeCaching: [
+					{
+						urlPattern: /^https:\/\/cdn\.sanity\.io\/.*/i,
+						handler: 'CacheFirst',
+						options: {
+							cacheName: 'sanity-images',
+							expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 30 }
+						}
+					},
+					{
+						urlPattern: /^https:\/\/[a-z0-9]+\.api\.sanity\.io\/.*/i,
+						handler: 'NetworkFirst',
+						options: {
+							cacheName: 'sanity-api',
+							expiration: { maxEntries: 50, maxAgeSeconds: 60 * 60 * 24 },
+							networkTimeoutSeconds: 10
+						}
+					}
+				]
+			}
 		})
 	],
 	test: {
