@@ -40,12 +40,13 @@ export default defineConfig({
 				navigateFallback: null,
 				runtimeCaching: [
 					{
-						// Sanity image CDN
+						// Sanity image CDN — force-cache despite Cache-Control: private
 						urlPattern: /^https:\/\/cdn\.sanity\.io\/images\/.*/i,
 						handler: 'CacheFirst',
 						options: {
 							cacheName: 'sanity-images',
-							expiration: { maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 30 }
+							expiration: { maxEntries: 300, maxAgeSeconds: 60 * 60 * 24 * 30 },
+							cacheableResponse: { statuses: [0, 200] }
 						}
 					},
 					{
@@ -55,7 +56,8 @@ export default defineConfig({
 						options: {
 							cacheName: 'sanity-audio',
 							expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
-							rangeRequests: true
+							rangeRequests: true,
+							cacheableResponse: { statuses: [0, 200] }
 						}
 					},
 					{
