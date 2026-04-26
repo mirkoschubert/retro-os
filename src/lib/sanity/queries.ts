@@ -99,6 +99,7 @@ export const photoSeriesQuery = groq`*[_type == "photoSeries"] | order(date desc
 
 export const sysInfoQuery = groq`*[_type == "sysInfo"][0] {
   user,
+  fullname,
   hostname,
   build,
   shell,
@@ -106,5 +107,9 @@ export const sysInfoQuery = groq`*[_type == "sysInfo"][0] {
   location,
   available_for,
   bio,
+  portrait,
+  profession,
+  currently,
+  tools,
   stack
 }`;

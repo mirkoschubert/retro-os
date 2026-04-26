@@ -156,6 +156,8 @@
 			photos: data.photos,
 			photoSeries: data.photoSeries,
 			albums: data.albums,
+			publications: data.publications,
+			sysInfo: data.sysInfo,
 			...extraProps
 		};
 

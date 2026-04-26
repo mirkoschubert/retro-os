@@ -1,102 +1,295 @@
 <script lang="ts">
 	import { getMessages } from '$lib/i18n.js';
-	import { SYS, PROJECTS, ESSAYS, PHOTOS, pickL } from '$lib/data/placeholder.js';
 	import { systemStore } from '$lib/stores/system.svelte.js';
+	import { PortableText } from '@portabletext/svelte';
+	import type { InputValue } from '@portabletext/svelte';
+	import { urlFor } from '$lib/sanity/image.js';
+	import type { SysInfo } from '$lib/sanity/types.js';
 
 	interface Props {
+		sysInfo?: SysInfo | null;
+		projects?: { _id: string }[];
+		writings?: { _id: string }[];
+		photos?: { _id: string }[];
 		winId?: string;
 	}
 
-	const {}: Props = $props();
+	const { sysInfo, projects = [], writings = [], photos = [] }: Props = $props();
+
 	const lang = $derived(systemStore.lang);
 	const t = $derived(getMessages(lang));
+
+	const l = $derived((field: { en?: string; de?: string } | undefined) =>
+		field ? (lang === 'de' ? field.de : field.en) ?? '–' : '–'
+	);
+
+	const portraitUrl = $derived(
+		sysInfo?.portrait ? urlFor(sysInfo.portrait).width(240).height(300).fit('crop').url() : null
+	);
+	const bio = $derived(
+		sysInfo?.bio ? (lang === 'de' ? sysInfo.bio.de : sysInfo.bio.en) as InputValue : null
+	);
 </script>
 
-<div style="overflow:auto;flex:1;padding:28px 36px;background:var(--bg-1)">
-	<div style="display:grid;grid-template-columns:120px 1fr;gap:28px;align-items:start">
-		<div class="ph-image" style="width:120px;height:150px">
-			<div class="ph-cap">portrait</div>
-			<div class="ph-tag">2025</div>
+<div class="sysinfo-wrap">
+	<div class="sysinfo-header">
+		<div class="portrait-frame">
+			{#if portraitUrl}
+				<img src={portraitUrl} alt="Portrait" class="portrait-img" />
+			{:else}
+				<div class="portrait-placeholder">
+					<span class="mono dim">portrait</span>
+				</div>
+			{/if}
 		</div>
-		<div>
-			<h1 class="serif" style="font-family:var(--font-display);font-size:28px;font-weight:600;margin:0 0 4px">
-				Mirko Schubert
-			</h1>
-			<div class="dim mono" style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:14px">
-				{lang === 'de' ? 'Gestalter, Autor, Kleinsoftware-Bauer' : 'Designer · Writer · Small-software builder'} · {lang === 'de' ? SYS.city_de : SYS.city_en}
+
+		<div class="sysinfo-identity">
+			<h1 class="sysinfo-name">{sysInfo?.fullname ?? sysInfo?.user ?? '–'}</h1>
+			<div class="mono dim sysinfo-role">{l(sysInfo?.profession)}</div>
+
+			{#if bio}
+				<div class="sysinfo-bio">
+					<PortableText value={bio} />
+				</div>
+			{:else}
+				<p class="sysinfo-bio">–</p>
+			{/if}
+
+			<div class="sysinfo-meta-grid">
+				<div class="mono dim meta-label">{t.available()}</div>
+				<div>{l(sysInfo?.available_for)}</div>
+				<div class="mono dim meta-label">{t.location()}</div>
+				<div>{sysInfo?.location ?? '–'}</div>
+				<div class="mono dim meta-label">{t.contact()}</div>
+				<div><span class="mono accent">{sysInfo?.email ?? '–'}</span></div>
 			</div>
-			<p style="font-size:13.5px;color:var(--text-1);line-height:1.65;max-width:560px;margin-bottom:18px">
-				{lang === 'de'
-					? 'Ich entwerfe und baue ruhige, präzise Software - Reader, Archive, Werkzeuge für die lange Aufmerksamkeit. Studio in Köln, Projekte in Europa.'
-					: 'I design and build quiet, precise software - readers, archives, tools for sustained attention. Studio in Cologne, projects across Europe.'}
-			</p>
-			<div style="display:grid;grid-template-columns:120px 1fr;row-gap:6px;font-size:12.5px">
-				<div class="mono dim" style="font-size:10.5px;text-transform:uppercase;letter-spacing:0.1em">{t.available()}</div>
-				<div style="color:var(--text-1)">{pickL(lang, SYS.available_for)}</div>
-				<div class="mono dim" style="font-size:10.5px;text-transform:uppercase;letter-spacing:0.1em">{t.location()}</div>
-				<div style="color:var(--text-1)">{lang === 'de' ? SYS.city_de : SYS.city_en}, DE</div>
-				<div class="mono dim" style="font-size:10.5px;text-transform:uppercase;letter-spacing:0.1em">{t.contact()}</div>
-				<div><span class="mono" style="color:var(--accent)">{SYS.email}</span></div>
+		</div>
+	</div>
+
+	<div class="divider"></div>
+
+	<div class="sysinfo-section">
+		<div class="mono dim si-label">{t.now()}</div>
+		<p class="section-body">{l(sysInfo?.currently)}</p>
+	</div>
+
+	<div class="sysinfo-section">
+		<div class="mono dim si-label">{t.stack()}</div>
+		{#if sysInfo?.stack && sysInfo.stack.length > 0}
+			<div class="tag-list">
+				{#each sysInfo.stack as item}
+					<span class="tag">{item}</span>
+				{/each}
 			</div>
-		</div>
+		{:else}
+			<p class="section-body dim">–</p>
+		{/if}
 	</div>
 
-	<div style="height:1px;background:var(--line-1);margin:22px 0"></div>
-
-	<div style="margin:20px 0">
-		<div class="mono dim" style="font-size:10.5px;text-transform:uppercase;letter-spacing:0.14em;margin-bottom:8px">{t.now()}</div>
-		<p style="font-size:13px;color:var(--text-1);line-height:1.65;max-width:560px">
-			{lang === 'de'
-				? 'Schreibe an einem Buch über Werkzeuge und Aufmerksamkeit. Pflege Atlas und Telephon. Lehre einmal im Quartal an der KISD.'
-				: 'Writing a small book on tools and attention. Maintaining Atlas and Telephon. Teaching one workshop a quarter at KISD.'}
-		</p>
+	<div class="sysinfo-section">
+		<div class="mono dim si-label">{t.tools()}</div>
+		{#if sysInfo?.tools && sysInfo.tools.length > 0}
+			<div class="mono dim tools-list">
+				{sysInfo.tools.join(' · ')}
+			</div>
+		{:else}
+			<p class="mono dim tools-list">–</p>
+		{/if}
 	</div>
 
-	<div style="margin:20px 0">
-		<div class="mono dim" style="font-size:10.5px;text-transform:uppercase;letter-spacing:0.14em;margin-bottom:8px">{t.skills()}</div>
-		<ul style="columns:2;column-gap:36px;font-size:12.5px;color:var(--text-1);margin:0;padding:0;list-style:none">
-			<li>· {lang === 'de' ? 'Editorialdesign & Typografie' : 'Editorial design & typography'}</li>
-			<li>· {lang === 'de' ? 'Reader- und Archiv-Interfaces' : 'Reader & archive interfaces'}</li>
-			<li>· {lang === 'de' ? 'Frontend (TS, Svelte, Next, Astro)' : 'Frontend (TS, Svelte, Next, Astro)'}</li>
-			<li>· {lang === 'de' ? 'Designsysteme & Tokens' : 'Design systems & tokens'}</li>
-			<li>· {lang === 'de' ? 'Schnittstellen für historische Daten' : 'Interfaces for historical data'}</li>
-			<li>· {lang === 'de' ? 'Audio (WebAudio, Tone.js)' : 'Audio (WebAudio, Tone.js)'}</li>
-		</ul>
-	</div>
+	<div class="divider"></div>
 
-	<div style="margin:20px 0">
-		<div class="mono dim" style="font-size:10.5px;text-transform:uppercase;letter-spacing:0.14em;margin-bottom:8px">{t.tools()}</div>
-		<div class="mono dim" style="font-size:11.5px;line-height:1.9">
-			Helix · Zed · Figma · Pages · Drafts · A6 notebook · Pentax 67 · Leica Q2 Mono · 2018 ThinkPad
-		</div>
-	</div>
-
-	<div style="height:1px;background:var(--line-1);margin:22px 0"></div>
-
-	<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px">
-		<div style="border:1px solid var(--line-1);padding:14px 16px;background:var(--bg-2)">
-			<div class="serif" style="font-family:var(--font-display);font-size:32px;color:var(--accent);line-height:1">{PROJECTS.length}</div>
-			<div class="mono dim" style="font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;margin-top:6px">
+	<div class="sysinfo-stats">
+		<div class="stat-card">
+			<div class="serif stat-number">{projects.length}</div>
+			<div class="mono dim stat-label">
 				{lang === 'de' ? 'Projekte im Archiv' : 'Projects in archive'}
 			</div>
 		</div>
-		<div style="border:1px solid var(--line-1);padding:14px 16px;background:var(--bg-2)">
-			<div class="serif" style="font-family:var(--font-display);font-size:32px;color:var(--accent);line-height:1">{ESSAYS.length}</div>
-			<div class="mono dim" style="font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;margin-top:6px">
+		<div class="stat-card">
+			<div class="serif stat-number">{writings.length}</div>
+			<div class="mono dim stat-label">
 				{lang === 'de' ? 'Essays veröffentlicht' : 'Essays published'}
 			</div>
 		</div>
-		<div style="border:1px solid var(--line-1);padding:14px 16px;background:var(--bg-2)">
-			<div class="serif" style="font-family:var(--font-display);font-size:32px;color:var(--accent);line-height:1">{PHOTOS.length}</div>
-			<div class="mono dim" style="font-size:10.5px;letter-spacing:0.1em;text-transform:uppercase;margin-top:6px">
-				{lang === 'de' ? 'Aufnahmen 2022-2024' : 'Frames 2022-2024'}
+		<div class="stat-card">
+			<div class="serif stat-number">{photos.length}</div>
+			<div class="mono dim stat-label">
+				{lang === 'de' ? 'Aufnahmen archiviert' : 'Frames archived'}
 			</div>
 		</div>
 	</div>
 
-	<div style="height:1px;background:var(--line-1);margin:22px 0"></div>
+	<div class="divider"></div>
 
-	<div class="mono dim" style="font-size:10.5px;letter-spacing:0.06em">
-		RetroOS {SYS.build} · {SYS.shell} · uptime {SYS.uptime} · build 2026.04.25
+	<div class="mono dim sysinfo-footer">
+		RetroOS {sysInfo?.build ?? '–'} · {sysInfo?.shell ?? '–'} · build 2026.04.25
 	</div>
 </div>
+
+<style>
+	.sysinfo-wrap {
+		flex: 1;
+		overflow-y: auto;
+		padding: 28px 36px;
+		background: var(--bg-1);
+	}
+
+	.sysinfo-header {
+		display: grid;
+		grid-template-columns: 120px 1fr;
+		gap: 28px;
+		align-items: start;
+	}
+
+	.portrait-frame {
+		width: 120px;
+		height: 150px;
+		border: 1px solid var(--line-1);
+		overflow: hidden;
+		flex-shrink: 0;
+	}
+
+	.portrait-img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+		display: block;
+	}
+
+	.portrait-placeholder {
+		width: 100%;
+		height: 100%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--bg-2);
+		font-size: 10px;
+	}
+
+	.sysinfo-identity {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+	}
+
+	.sysinfo-name {
+		font-family: var(--font-display);
+		font-size: 28px;
+		font-weight: 600;
+		margin: 0;
+		color: var(--text-0);
+	}
+
+	.sysinfo-role {
+		font-size: 11px;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+	}
+
+	.sysinfo-bio {
+		font-size: 13.5px;
+		color: var(--text-1);
+		line-height: 1.65;
+		max-width: 560px;
+		margin: 0;
+	}
+
+	.sysinfo-bio :global(p) {
+		margin: 0 0 8px;
+	}
+
+	.sysinfo-meta-grid {
+		display: grid;
+		grid-template-columns: 120px 1fr;
+		row-gap: 6px;
+		font-size: 12.5px;
+	}
+
+	.meta-label {
+		font-size: 10.5px;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
+	}
+
+	.accent {
+		color: var(--accent);
+	}
+
+	.divider {
+		height: 1px;
+		background: var(--line-1);
+		margin: 22px 0;
+	}
+
+	.sysinfo-section {
+		margin: 20px 0;
+	}
+
+	.si-label {
+		font-size: 10.5px;
+		text-transform: uppercase;
+		letter-spacing: 0.14em;
+		margin-bottom: 8px;
+	}
+
+	.section-body {
+		font-size: 13px;
+		color: var(--text-1);
+		line-height: 1.65;
+		max-width: 560px;
+		margin: 0;
+	}
+
+	.tag-list {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 6px;
+	}
+
+	.tag {
+		font-family: var(--font-mono);
+		font-size: 11px;
+		padding: 3px 8px;
+		border: 1px solid var(--line-1);
+		color: var(--text-1);
+		background: var(--bg-2);
+	}
+
+	.tools-list {
+		font-size: 11.5px;
+		line-height: 1.9;
+		margin: 0;
+	}
+
+	.sysinfo-stats {
+		display: grid;
+		grid-template-columns: repeat(3, 1fr);
+		gap: 18px;
+	}
+
+	.stat-card {
+		border: 1px solid var(--line-1);
+		padding: 14px 16px;
+		background: var(--bg-2);
+	}
+
+	.stat-number {
+		font-family: var(--font-display);
+		font-size: 32px;
+		color: var(--accent);
+		line-height: 1;
+	}
+
+	.stat-label {
+		font-size: 10.5px;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		margin-top: 6px;
+	}
+
+	.sysinfo-footer {
+		font-size: 10.5px;
+		letter-spacing: 0.06em;
+	}
+</style>

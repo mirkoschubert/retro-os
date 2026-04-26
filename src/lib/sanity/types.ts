@@ -125,6 +125,7 @@ export interface PhotoSeries {
 
 export interface SysInfo {
 	user?: string;
+	fullname?: string;
 	hostname?: string;
 	build?: string;
 	shell?: string;
@@ -132,5 +133,9 @@ export interface SysInfo {
 	location?: string;
 	available_for?: LocaleString;
 	bio?: LocaleBlocks;
+	portrait?: SanityImage;
+	profession?: LocaleString;
+	currently?: LocaleString;
+	tools?: string[];
 	stack?: string[];
 }

@@ -11,6 +11,11 @@ export const sysInfo = defineType({
 			type: 'string'
 		}),
 		defineField({
+			name: 'fullname',
+			title: 'Full Name',
+			type: 'string'
+		}),
+		defineField({
 			name: 'hostname',
 			title: 'Hostname',
 			type: 'string'
@@ -62,6 +67,36 @@ export const sysInfo = defineType({
 					of: [{ type: 'block' }]
 				}
 			]
+		}),
+		defineField({
+			name: 'portrait',
+			title: 'Portrait',
+			type: 'image',
+			options: { hotspot: true }
+		}),
+		defineField({
+			name: 'profession',
+			title: 'Profession / Role',
+			type: 'object',
+			fields: [
+				{ name: 'en', type: 'string', title: 'English' },
+				{ name: 'de', type: 'string', title: 'Deutsch' }
+			]
+		}),
+		defineField({
+			name: 'currently',
+			title: 'Currently (Now section)',
+			type: 'object',
+			fields: [
+				{ name: 'en', type: 'text', title: 'English', rows: 3 },
+				{ name: 'de', type: 'text', title: 'Deutsch', rows: 3 }
+			]
+		}),
+		defineField({
+			name: 'tools',
+			title: 'Tools',
+			type: 'array',
+			of: [{ type: 'string' }]
 		}),
 		defineField({
 			name: 'stack',
