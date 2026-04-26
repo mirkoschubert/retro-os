@@ -16,13 +16,26 @@
 	interface Props {
 		winId?: string;
 		albums?: Album[];
+		initialAlbumId?: string;
 	}
 
-	const { albums = [] }: Props = $props();
+	const { albums = [], initialAlbumId }: Props = $props();
 	const lang = $derived(systemStore.lang);
 	const t = $derived(getMessages(lang));
 
 	let view = $state<'library' | 'albums'>('library');
+	let handledAlbumId = $state<string | null>(null);
+	$effect(() => {
+		if (initialAlbumId && initialAlbumId !== handledAlbumId) {
+			handledAlbumId = initialAlbumId;
+			const album = albums.find((a) => a._id === initialAlbumId);
+			const firstKey = album?.tracks?.[0]?._key;
+			if (firstKey) {
+				view = 'library';
+				togglePlay(firstKey);
+			}
+		}
+	});
 	let playingKey = $state<string | null>(null);
 	let isPlaying = $state(false);
 	let progress = $state(0);

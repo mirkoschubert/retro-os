@@ -319,6 +319,11 @@
 		onOpenModule={openModule}
 		onSetLang={(l) => systemStore.setLang(l)}
 		onSetEra={(e) => systemStore.setEra(e)}
+		projects={data.projects}
+		writings={data.writings}
+		photos={data.photos}
+		albums={data.albums}
+		publications={data.publications}
 	/>
 
 	{#if !systemStore.bootDone}

@@ -1,18 +1,26 @@
 <script lang="ts">
 	import { getMessages } from '$lib/i18n.js';
-	import { PROJECTS, ESSAYS, PHOTOS, TRACKS, pickL } from '$lib/data/placeholder.js';
+	import { pickLocale } from '$lib/sanity/utils.js';
 	import type { Lang, Era } from '$lib/stores/system.svelte.js';
+	import type { Project, Writing, Photo, Album, Publication } from '$lib/sanity/types.js';
 
 	interface Props {
 		open: boolean;
 		lang: Lang;
 		onClose: () => void;
-		onOpenModule: (key: string) => void;
+		onOpenModule: (key: string, extraProps?: Record<string, unknown>) => void;
 		onSetLang: (lang: Lang) => void;
 		onSetEra: (era: Era) => void;
+		projects?: Project[];
+		writings?: Writing[];
+		photos?: Photo[];
+		albums?: Album[];
+		publications?: Publication[];
 	}
 
-	const { open, lang, onClose, onOpenModule, onSetLang, onSetEra }: Props = $props();
+	const { open, lang, onClose, onOpenModule, onSetLang, onSetEra,
+		projects = [], writings = [], photos = [], albums = [], publications = []
+	}: Props = $props();
 	const t = $derived(getMessages(lang));
 
 	let query = $state('');
@@ -48,33 +56,42 @@
 		{ id: 'era-graphite',  label: 'Theme - Graphite (NeXT)',   kind: 'PREF', on: () => onSetEra('graphite') },
 		{ id: 'era-atelier',   label: 'Theme - Atelier (Mac 7)',   kind: 'PREF', on: () => onSetEra('atelier') },
 		{ id: 'era-workbench', label: 'Theme - Workbench (Amiga)', kind: 'PREF', on: () => onSetEra('workbench') },
-		...PROJECTS.map((p) => ({
-			id: 'proj-' + p.id,
-			label: pickL(lang, p.title),
-			sub: `${p.year} · ${p.client}`,
+		...projects.map((p) => ({
+			id: 'proj-' + p._id,
+			label: pickLocale(lang, p.title),
+			sub: [p.year, p.client].filter(Boolean).join(' · '),
 			kind: 'PROJ',
-			on: () => onOpenModule('projects')
+			on: () => onOpenModule('projects', { initialId: p._id })
 		})),
-		...ESSAYS.map((e) => ({
-			id: 'ess-' + e.id,
-			label: pickL(lang, e.title),
-			sub: `${e.date} · ${e.minutes}min`,
+		...writings.map((w) => ({
+			id: 'ess-' + w._id,
+			label: pickLocale(lang, w.title),
+			sub: w.date ?? '',
 			kind: 'TEXT',
-			on: () => onOpenModule('writer')
+			on: () => onOpenModule('writer', { initialId: w._id })
 		})),
-		...PHOTOS.slice(0, 6).map((p) => ({
-			id: 'ph-' + p.id,
-			label: pickL(lang, p.title),
-			sub: `${p.date} · ${p.camera}`,
+		...photos.map((p) => ({
+			id: 'ph-' + p._id,
+			label: pickLocale(lang, p.title),
+			sub: [p.date, p.camera].filter(Boolean).join(' · '),
 			kind: 'PHOT',
-			on: () => onOpenModule('darkroom')
+			on: () => onOpenModule('darkroom', { initialId: p._id })
 		})),
-		...TRACKS.slice(0, 6).map((t) => ({
-			id: 'tr-' + t.id,
-			label: t.title,
-			sub: `${t.artist} · ${t.album}`,
-			kind: 'MUSC',
-			on: () => onOpenModule('media')
+		...albums.flatMap((a) =>
+			(a.tracks ?? []).map((tr) => ({
+				id: 'tr-' + a._id + '-' + tr._key,
+				label: tr.title,
+				sub: `${tr.artist ?? a.artist} · ${a.title}`,
+				kind: 'MUSC',
+				on: () => onOpenModule('media', { initialAlbumId: a._id })
+			}))
+		),
+		...publications.map((p) => ({
+			id: 'pub-' + p._id,
+			label: p.name,
+			sub: p.category ?? '',
+			kind: 'PUB',
+			on: () => onOpenModule('publications', { initialId: p._id })
 		}))
 	]);
 

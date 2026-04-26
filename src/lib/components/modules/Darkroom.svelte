@@ -11,15 +11,28 @@
 		winId?: string;
 		photos?: Photo[];
 		photoSeries?: PhotoSeries[];
+		initialId?: string;
 	}
 
-	const { winId, photos = [], photoSeries = [] }: Props = $props();
+	const { winId, photos = [], photoSeries = [], initialId }: Props = $props();
 
 	const lang = $derived(systemStore.lang);
 	const t = $derived(getMessages(lang));
 
 	let selectedId = $state('');
 	let view = $state<'contact' | 'single'>('contact');
+	$effect.pre(() => {
+		if (!selectedId && photos.length > 0 && initialId) {
+			selectedId = initialId;
+			view = 'single';
+		}
+	});
+	$effect(() => {
+		if (initialId) {
+			selectedId = initialId;
+			view = 'single';
+		}
+	});
 	let selectedSeriesId = $state<string | null>(null);
 	let exposure = $state(0);
 	let contrast = $state(0);

@@ -7,9 +7,10 @@
 	interface Props {
 		publications?: Publication[];
 		winId?: string;
+		initialId?: string;
 	}
 
-	const { publications = [] }: Props = $props();
+	const { publications = [], initialId }: Props = $props();
 	const lang = $derived(systemStore.lang);
 	const t = $derived(getMessages(lang));
 
@@ -29,6 +30,12 @@
 	);
 
 	let selectedId = $state<string | null>(null);
+	$effect.pre(() => {
+		if (selectedId === null && publications.length > 0) selectedId = initialId ?? publications[0]._id;
+	});
+	$effect(() => {
+		if (initialId) selectedId = initialId;
+	});
 	const effectiveId = $derived(selectedId ?? filtered[0]?._id ?? null);
 	const selected = $derived(publications.find((p) => p._id === effectiveId) ?? null);
 

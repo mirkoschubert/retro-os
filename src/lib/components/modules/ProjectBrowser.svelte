@@ -8,9 +8,10 @@
 	interface Props {
 		winId?: string;
 		projects?: Project[];
+		initialId?: string;
 	}
 
-	const { projects = [] }: Props = $props();
+	const { projects = [], initialId }: Props = $props();
 	const lang = $derived(systemStore.lang);
 	const msg = $derived(getMessages(lang));
 
@@ -19,7 +20,10 @@
 	let search = $state('');
 	let selectedId = $state('');
 	$effect.pre(() => {
-		if (!selectedId && projects.length > 0) selectedId = projects[0]._id;
+		if (!selectedId && projects.length > 0) selectedId = initialId ?? projects[0]._id;
+	});
+	$effect(() => {
+		if (initialId) selectedId = initialId;
 	});
 
 	const filtered = $derived(

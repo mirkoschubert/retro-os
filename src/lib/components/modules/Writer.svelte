@@ -8,9 +8,10 @@
 	interface Props {
 		winId?: string;
 		writings?: Writing[];
+		initialId?: string;
 	}
 
-	const { writings = [] }: Props = $props();
+	const { writings = [], initialId }: Props = $props();
 	const lang = $derived(systemStore.lang);
 	const t = $derived(getMessages(lang));
 
@@ -30,6 +31,12 @@
 	);
 
 	let selectedId = $state<string | null>(null);
+	$effect.pre(() => {
+		if (selectedId === null && writings.length > 0) selectedId = initialId ?? writings[0]._id;
+	});
+	$effect(() => {
+		if (initialId) selectedId = initialId;
+	});
 	const effectiveId = $derived(selectedId ?? filtered[0]?._id ?? null);
 	const selected = $derived(writings.find((w) => w._id === effectiveId) ?? null);
 
