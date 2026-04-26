@@ -42,6 +42,13 @@
 		<rect x="4" y="9" width="16" height="11" />
 		<line x1="10" y1="13" x2="14" y2="13" />
 	</svg>
+{:else if kind === 'publications'}
+	<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={sw}>
+		<rect x="4" y="3" width="16" height="18" />
+		<line x1="8" y1="8" x2="16" y2="8" />
+		<line x1="8" y1="12" x2="16" y2="12" />
+		<line x1="8" y1="16" x2="12" y2="16" />
+	</svg>
 {:else if kind === 'terminal'}
 	<svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width={sw}>
 		<rect x="3" y="5" width="18" height="14" />

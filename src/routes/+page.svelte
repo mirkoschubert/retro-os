@@ -16,6 +16,7 @@
 	import SysInfo from '$lib/components/modules/SysInfo.svelte';
 	import Terminal from '$lib/components/modules/Terminal.svelte';
 	import About from '$lib/components/modules/About.svelte';
+	import Publications from '$lib/components/modules/Publications.svelte';
 	import Legal from '$lib/components/modules/Legal.svelte';
 	import type { Component } from 'svelte';
 	import type { PageData } from './$types';
@@ -113,6 +114,13 @@
 				titleKey: 'mod_terminal',
 				component: Terminal as unknown as Component<Record<string, unknown>>,
 				x: 200, y: 80, w: 520, h: 380, minW: 360, minH: 240
+			},
+			{
+				id: 'publications',
+				title: 'Publications',
+				titleKey: 'mod_publications',
+				component: Publications as unknown as Component<Record<string, unknown>>,
+				x: 160, y: 70, w: 580, h: 440, minW: 420, minH: 300
 			},
 			{
 				id: 'legal',
