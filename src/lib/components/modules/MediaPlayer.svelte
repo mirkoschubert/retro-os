@@ -118,6 +118,22 @@
 		return urlForAudioFile(track.audioFile.asset._ref);
 	}
 
+	const audioBlobCache = new Map<string, string>();
+
+	async function resolveAudioSrc(url: string): Promise<string> {
+		if (audioBlobCache.has(url)) return audioBlobCache.get(url)!;
+		try {
+			const res = await fetch(url);
+			if (!res.ok) return url;
+			const blob = await res.blob();
+			const objectUrl = URL.createObjectURL(blob);
+			audioBlobCache.set(url, objectUrl);
+			return objectUrl;
+		} catch {
+			return url;
+		}
+	}
+
 	function togglePlay(key: string) {
 		if (!audioEl) return;
 		const track = allTracks.find((t) => t._key === key);
@@ -140,9 +156,12 @@
 		progress = 0;
 		currentTime = 0;
 		duration = 0;
-		audioEl.src = url;
 		audioEl.volume = vol;
-		audioEl.play().then(() => { isPlaying = true; }).catch(() => {});
+		resolveAudioSrc(url).then((src) => {
+			if (!audioEl) return;
+			audioEl.src = src;
+			audioEl.play().then(() => { isPlaying = true; }).catch(() => {});
+		});
 	}
 
 	function playNext() {
