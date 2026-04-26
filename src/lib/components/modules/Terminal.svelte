@@ -1,13 +1,23 @@
 <script lang="ts">
-	import { SYS, PROJECTS, ESSAYS, PHOTOS, TRACKS, pickL } from '$lib/data/placeholder.js';
 	import { systemStore } from '$lib/stores/system.svelte.js';
+	import { pickLocale } from '$lib/sanity/utils.js';
+	import type { Project, Writing, Photo, Album, SysInfo } from '$lib/sanity/types.js';
+
+	function pad(s: string | undefined, n: number) {
+		return (s ?? '').padEnd(n);
+	}
 
 	interface Props {
 		onOpenModule: (key: string) => void;
+		projects?: Project[];
+		writings?: Writing[];
+		photos?: Photo[];
+		albums?: Album[];
+		sysInfo?: SysInfo | null;
 		winId?: string;
 	}
 
-	const { onOpenModule }: Props = $props();
+	const { onOpenModule, projects = [], writings = [], photos = [], albums = [], sysInfo }: Props = $props();
 	const lang = $derived(systemStore.lang);
 
 	interface HistoryLine {
@@ -25,7 +35,7 @@
 
 	function initLines(): HistoryLine[] {
 		return [
-			{ kind: 'sys', text: `RetroOS ${SYS.shell} - ${SYS.build}` },
+			{ kind: 'sys', text: `RetroOS ${sysInfo?.shell ?? 'msh'} - ${sysInfo?.build ?? '–'}` },
 			{
 				kind: 'sys',
 				text:
@@ -48,6 +58,7 @@
 		writer: 'writer', writing: 'writer',
 		media: 'media', music: 'media',
 		darkroom: 'darkroom', photos: 'darkroom',
+		publications: 'publications', pub: 'publications',
 		sysinfo: 'sysinfo', about: 'sysinfo',
 		terminal: 'terminal'
 	};
@@ -71,24 +82,33 @@
 							: 'Available commands:\n  help                  This list\n  whoami                Short bio\n  ls [section]          List contents\n  open <program>        Launch program\n  lang [en|de]          Switch language\n  clear                 Clear screen'
 				});
 				break;
-			case 'whoami':
-				out.push({
-					kind: 'out',
-					text: `mirko schubert · ${SYS.email}\n${lang === 'de' ? 'Gestalter, Autor, Köln' : 'Designer, writer, Cologne'}\n${pickL(lang, SYS.available_for)}`
-				});
+			case 'whoami': {
+				const email = sysInfo?.email ?? '–';
+				const name = sysInfo?.fullname ?? sysInfo?.user ?? '–';
+				const prof = sysInfo?.profession ? (lang === 'de' ? sysInfo.profession.de : sysInfo.profession.en) ?? '–' : '–';
+				const avail = sysInfo?.available_for ? (lang === 'de' ? sysInfo.available_for.de : sysInfo.available_for.en) ?? '–' : '–';
+				out.push({ kind: 'out', text: `${name} · ${email}\n${prof}\n${avail}` });
 				break;
+			}
 			case 'ls': {
 				const sec = (arg || '').toLowerCase();
 				if (!sec || sec === '/' || sec === '~') {
-					out.push({ kind: 'out', text: 'projects/   writing/   photos/   music/   system/' });
+					out.push({ kind: 'out', text: 'projects/   writing/   photos/   music/   publications/   system/' });
 				} else if (sec.startsWith('proj')) {
-					out.push({ kind: 'out', text: PROJECTS.map((p) => `${p.year}  ${p.id.padEnd(22)}  ${pickL(lang, p.title)}`).join('\n') });
+					if (projects.length === 0) { out.push({ kind: 'out', text: lang === 'de' ? '(keine Projekte geladen)' : '(no projects loaded)' }); break; }
+					out.push({ kind: 'out', text: projects.map((p) => `${p.year ?? '????'}  ${pad(p.slug?.current, 24)}  ${pickLocale(lang, p.title)}`).join('\n') });
 				} else if (sec.startsWith('writ')) {
-					out.push({ kind: 'out', text: ESSAYS.map((e) => `${e.date}  ${e.id.padEnd(22)}  ${pickL(lang, e.title)}`).join('\n') });
+					if (writings.length === 0) { out.push({ kind: 'out', text: lang === 'de' ? '(keine Texte geladen)' : '(no writings loaded)' }); break; }
+					out.push({ kind: 'out', text: writings.map((w) => `${w.date ?? '????-??-??'}  ${pad(w.slug?.current, 24)}  ${pickLocale(lang, w.title)}`).join('\n') });
 				} else if (sec.startsWith('phot')) {
-					out.push({ kind: 'out', text: PHOTOS.map((p) => `${p.date}  ${p.id.padEnd(6)}  ${p.camera.padEnd(20)}  ${pickL(lang, p.title)}`).join('\n') });
+					if (photos.length === 0) { out.push({ kind: 'out', text: lang === 'de' ? '(keine Fotos geladen)' : '(no photos loaded)' }); break; }
+					out.push({ kind: 'out', text: photos.map((p) => `${p.date ?? '????-??-??'}  ${pad(p.camera, 20)}  ${pickLocale(lang, p.title)}`).join('\n') });
 				} else if (sec.startsWith('mus')) {
-					out.push({ kind: 'out', text: TRACKS.map((tr) => `${tr.year}  ${tr.length.padStart(5)}  ${tr.artist.padEnd(20)}  ${tr.title}`).join('\n') });
+					const tracks = albums.flatMap((a) => (a.tracks ?? []).map((tr) => ({ artist: a.artist, album: a.title, title: tr.title, year: a.year })));
+					if (tracks.length === 0) { out.push({ kind: 'out', text: lang === 'de' ? '(keine Tracks geladen)' : '(no tracks loaded)' }); break; }
+					out.push({ kind: 'out', text: tracks.map((tr) => `${tr.year ?? '????'}  ${pad(tr.artist, 20)}  ${tr.title}`).join('\n') });
+				} else if (sec.startsWith('pub')) {
+					out.push({ kind: 'out', text: lang === 'de' ? 'Benutze `open publications` um das Modul zu öffnen.' : 'Use `open publications` to browse publications.' });
 				} else {
 					out.push({ kind: 'err', text: `ls: ${sec}: ${lang === 'de' ? 'kein solcher Bereich' : 'no such section'}` });
 				}
