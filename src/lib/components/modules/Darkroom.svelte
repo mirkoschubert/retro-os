@@ -163,7 +163,7 @@
 					>
 						{#if p.image}
 							<img
-								src={urlFor(p.image).width(400).height(267).auto('format').url()}
+								src={urlFor(p.image).width(400).height(267).format('webp').url()}
 								alt={pickLocale(lang, p.title)}
 								loading="lazy"
 								style="width:100%;aspect-ratio:3/2;object-fit:cover;display:block"
@@ -195,7 +195,7 @@
 					>
 						{#if p.image}
 							<img
-								src={urlFor(p.image).width(200).height(133).auto('format').url()}
+								src={urlFor(p.image).width(200).height(133).format('webp').url()}
 								alt=""
 								loading="lazy"
 								style="width:100%;aspect-ratio:3/2;object-fit:cover;display:block"
@@ -215,7 +215,7 @@
 					{#if selected.image}
 						<div style="position:relative;max-width:100%;max-height:100%;display:flex;filter:{imageFilter}">
 							<img
-								src={urlFor(selected.image).width(1200).auto('format').url()}
+								src={urlFor(selected.image).width(1200).format('webp').url()}
 								alt={pickLocale(lang, selected.title)}
 								style="max-width:100%;max-height:100%;width:auto;height:auto;display:block;object-fit:contain"
 							/>
