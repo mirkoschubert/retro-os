@@ -46,6 +46,7 @@ export function getMessages(locale: Locale) {
 		era_workbench: () => m.era_workbench({}, o),
 		cmd_palette: () => m.cmd_palette({}, o),
 		console: () => m.console({}, o),
+		menu_welcome: () => m.menu_welcome({}, o),
 		doc_tip: () => m.doc_tip({}, o),
 		mod_projects: () => m.mod_projects({}, o),
 		mod_media: () => m.mod_media({}, o),

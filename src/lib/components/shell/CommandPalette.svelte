@@ -41,7 +41,6 @@
 		{ id: 'open-darkroom', label: `${t.open_prog_prefix()} ${t.mod_darkroom()}`, kind: 'PROG', on: () => onOpenModule('darkroom') },
 		{ id: 'open-writer',   label: `${t.open_prog_prefix()} ${t.mod_writer()}`,   kind: 'PROG', on: () => onOpenModule('writer') },
 		{ id: 'open-sysinfo',  label: `${t.open_prog_prefix()} ${t.mod_sysinfo()}`,  kind: 'PROG', on: () => onOpenModule('sysinfo') },
-		{ id: 'open-archive',  label: `${t.open_prog_prefix()} ${t.mod_archive()}`,  kind: 'PROG', on: () => onOpenModule('archive') },
 		{ id: 'open-terminal', label: `${t.open_prog_prefix()} ${t.mod_terminal()}`, kind: 'PROG', on: () => onOpenModule('terminal') },
 		{ id: 'lang-en',       label: 'Language - English',  kind: 'PREF', on: () => onSetLang('en') },
 		{ id: 'lang-de',       label: 'Sprache - Deutsch',   kind: 'PREF', on: () => onSetLang('de') },

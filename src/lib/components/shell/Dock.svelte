@@ -18,7 +18,6 @@
 		{ key: 'darkroom', label: t.mod_darkroom() },
 		{ key: 'writer',   label: t.mod_writer() },
 		{ key: 'sysinfo',  label: t.mod_sysinfo() },
-		{ key: 'archive',  label: t.mod_archive() },
 		{ key: 'terminal', label: t.mod_terminal() }
 	]);
 </script>

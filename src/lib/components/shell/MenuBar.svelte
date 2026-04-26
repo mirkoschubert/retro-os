@@ -110,6 +110,8 @@
 			key: 'help',
 			label: t.help(),
 			dropdown: [
+				{ row: t.menu_welcome(), shortcut: '⌘0', on: () => { openKey = null; onOpenModule('welcome'); } },
+				{ divider: true },
 				{ row: t.cmd_palette(), shortcut: '⌘K', on: () => { openKey = null; onOpenPalette(); } },
 				{ row: t.console(), shortcut: '⌘.', on: () => { openKey = null; onOpenConsole(); } },
 				{ divider: true },

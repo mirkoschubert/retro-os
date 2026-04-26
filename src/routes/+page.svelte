@@ -14,7 +14,6 @@
 	import Darkroom from '$lib/components/modules/Darkroom.svelte';
 	import Writer from '$lib/components/modules/Writer.svelte';
 	import SysInfo from '$lib/components/modules/SysInfo.svelte';
-	import Archive from '$lib/components/modules/Archive.svelte';
 	import Terminal from '$lib/components/modules/Terminal.svelte';
 	import About from '$lib/components/modules/About.svelte';
 	import type { Component } from 'svelte';
@@ -106,13 +105,6 @@
 				titleKey: 'mod_sysinfo',
 				component: SysInfo as unknown as Component<Record<string, unknown>>,
 				x: 180, y: 70, w: 560, h: 480, minW: 400, minH: 320
-			},
-			{
-				id: 'archive',
-				title: 'Archive',
-				titleKey: 'mod_archive',
-				component: Archive as unknown as Component<Record<string, unknown>>,
-				x: 160, y: 68, w: 640, h: 460, minW: 480, minH: 320
 			},
 			{
 				id: 'terminal',
@@ -231,6 +223,10 @@
 					e.preventDefault();
 					wmStore.cycle();
 					break;
+				case '0':
+					e.preventDefault();
+					openModule('welcome');
+					break;
 				case '1':
 					e.preventDefault();
 					openModule('projects');
@@ -252,10 +248,6 @@
 					openModule('sysinfo');
 					break;
 				case '6':
-					e.preventDefault();
-					openModule('archive');
-					break;
-				case '7':
 					e.preventDefault();
 					openModule('terminal');
 					break;

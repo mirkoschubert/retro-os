@@ -49,7 +49,6 @@
 		media: 'media', music: 'media',
 		darkroom: 'darkroom', photos: 'darkroom',
 		sysinfo: 'sysinfo', about: 'sysinfo',
-		archive: 'archive', finder: 'archive',
 		terminal: 'terminal'
 	};
 
@@ -81,7 +80,7 @@
 			case 'ls': {
 				const sec = (arg || '').toLowerCase();
 				if (!sec || sec === '/' || sec === '~') {
-					out.push({ kind: 'out', text: 'projects/   writing/   photos/   music/   archive/   system/' });
+					out.push({ kind: 'out', text: 'projects/   writing/   photos/   music/   system/' });
 				} else if (sec.startsWith('proj')) {
 					out.push({ kind: 'out', text: PROJECTS.map((p) => `${p.year}  ${p.id.padEnd(22)}  ${pickL(lang, p.title)}`).join('\n') });
 				} else if (sec.startsWith('writ')) {

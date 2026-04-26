@@ -33,6 +33,7 @@
   "era_workbench": "Workbench (Amiga)",
   "cmd_palette": "Command Palette",
   "console": "Console",
+  "menu_welcome": "Welcome",
   "doc_tip": "Click an icon to open. Cmd+K for command palette.",
   "mod_projects": "Project Browser",
   "mod_media": "Media",
