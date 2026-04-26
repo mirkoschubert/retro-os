@@ -50,11 +50,6 @@ export default defineConfig({
 						}
 					},
 					{
-						// Sanity file CDN (audio) — NetworkOnly so the browser handles Range requests natively
-						urlPattern: /^https:\/\/cdn\.sanity\.io\/files\/.*/i,
-						handler: 'NetworkOnly'
-					},
-					{
 						// Sanity GROQ API
 						urlPattern: /^https:\/\/[a-z0-9]+\.api\.sanity\.io\/.*/i,
 						handler: 'NetworkFirst',
