@@ -116,5 +116,10 @@
   "legal_impressum": "Imprint",
   "legal_datenschutz": "Privacy Policy",
   "menu_impressum": "Imprint",
-  "menu_datenschutz": "Privacy Policy"
+  "menu_datenschutz": "Privacy Policy",
+  "open_on_spotify": "Open on Spotify",
+  "open_on_apple_music": "Open on Apple Music",
+  "open_on_youtube_music": "Open on YouTube Music",
+  "back_to_albums": "All Albums",
+  "all_tracks": "All Tracks"
 }

@@ -2,11 +2,20 @@
 	import { getMessages } from '$lib/i18n.js';
 	import type { Era, Lang } from '$lib/stores/system.svelte.js';
 
+	interface ViewOption {
+		row: string;
+		shortcut?: string;
+		disabled?: boolean;
+		checked?: boolean;
+		on?: () => void;
+	}
+
 	interface Props {
 		lang: Lang;
 		era: Era;
 		focusedTitle: string | null;
 		time: string;
+		viewOptions?: ViewOption[];
 		onSetLang: (lang: Lang) => void;
 		onSetEra: (era: Era) => void;
 		onOpenModule: (key: string, extraProps?: Record<string, unknown>) => void;
@@ -20,6 +29,7 @@
 		era,
 		focusedTitle,
 		time,
+		viewOptions,
 		onSetLang,
 		onSetEra,
 		onOpenModule,
@@ -90,11 +100,16 @@
 		{
 			key: 'view',
 			label: t.view(),
-			dropdown: [
-				{ row: t.view_grid(), shortcut: '⌘1', disabled: true, checked: true },
-				{ row: t.view_list(), shortcut: '⌘2', disabled: true },
-				{ row: t.view_columns(), shortcut: '⌘3', disabled: true }
-			]
+			dropdown: viewOptions?.length
+				? viewOptions.map((opt) => ({
+						...opt,
+						on: opt.on ? () => { openKey = null; opt.on!(); } : undefined
+					}))
+				: [
+						{ row: t.view_grid(), shortcut: '⌘⇧1', disabled: true, checked: true },
+						{ row: t.view_list(), shortcut: '⌘⇧2', disabled: true },
+						{ row: t.view_columns(), shortcut: '⌘⇧3', disabled: true }
+					]
 		},
 		{
 			key: 'win',

@@ -130,5 +130,10 @@ export function getMessages(locale: Locale) {
 		legal_datenschutz: () => m.legal_datenschutz({}, o),
 		menu_impressum: () => m.menu_impressum({}, o),
 		menu_datenschutz: () => m.menu_datenschutz({}, o),
+		open_on_spotify: () => m.open_on_spotify({}, o),
+		open_on_apple_music: () => m.open_on_apple_music({}, o),
+		open_on_youtube_music: () => m.open_on_youtube_music({}, o),
+		back_to_albums: () => m.back_to_albums({}, o),
+		all_tracks: () => m.all_tracks({}, o),
 	};
 }

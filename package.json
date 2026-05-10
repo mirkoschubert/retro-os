@@ -52,6 +52,7 @@
 		"@fontsource/jetbrains-mono": "^5.2.8",
 		"@fontsource/source-serif-4": "^5.2.9",
 		"@inlang/paraglide-js": "^2.16.1",
+		"@lucide/svelte": "^1.14.0",
 		"@portabletext/svelte": "^3.0.1",
 		"@sanity/client": "^7.22.0",
 		"@sanity/image-url": "^2.1.1",

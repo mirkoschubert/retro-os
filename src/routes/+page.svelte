@@ -64,6 +64,40 @@
 		return win.title;
 	});
 
+	interface ViewOption {
+		row: string;
+		shortcut?: string;
+		disabled?: boolean;
+		checked?: boolean;
+		on?: () => void;
+	}
+
+	// Context-sensitive view options depending on the focused window + its internal state
+	const viewOptions = $derived((): ViewOption[] => {
+		const focused = wmStore.windows.find((w) => w.id === wmStore.focusedId);
+		if (focused?.id === 'media') {
+			const currentView = (focused.props.view as string | undefined) ?? 'albums';
+			if (currentView === 'albums') {
+				const albumView = (focused.props.albumView as 'grid' | 'list' | undefined) ?? 'list';
+				return [
+					{
+						row: pageT.view_grid(), shortcut: '⌘⇧1', disabled: false, checked: albumView === 'grid',
+						on: () => wmStore.updateProps('media', { albumView: 'grid' })
+					},
+					{
+						row: pageT.view_list(), shortcut: '⌘⇧2', disabled: false, checked: albumView === 'list',
+						on: () => wmStore.updateProps('media', { albumView: 'list' })
+					}
+				];
+			}
+		}
+		return [
+			{ row: pageT.view_grid(), shortcut: '⌘⇧1', disabled: true, checked: true },
+			{ row: pageT.view_list(), shortcut: '⌘⇧2', disabled: true, checked: false },
+			{ row: pageT.view_columns(), shortcut: '⌘⇧3', disabled: true, checked: false }
+		];
+	});
+
 	function getModuleDefs(): ModuleDef[] {
 		return [
 			{
@@ -85,7 +119,7 @@
 				title: 'Media',
 				titleKey: 'mod_media',
 				component: MediaPlayer as unknown as Component<Record<string, unknown>>,
-				x: 120, y: 60, w: 680, h: 440, minW: 440, minH: 300
+				x: 120, y: 60, w: 860, h: 550, minW: 440, minH: 300
 			},
 			{
 				id: 'darkroom',
@@ -245,6 +279,16 @@
 			const meta = e.metaKey || e.ctrlKey;
 			if (!meta) return;
 
+			// ⌘⇧1/⌘⇧2/⌘⇧3: context-sensitive view toggles (separate from module shortcuts ⌘1-7)
+			if (e.shiftKey) {
+				const opts = viewOptions();
+				if (e.key === '1' && !opts[0]?.disabled) { e.preventDefault(); opts[0]?.on?.(); return; }
+				if (e.key === '2' && !opts[1]?.disabled) { e.preventDefault(); opts[1]?.on?.(); return; }
+				if (e.key === '3' && !opts[2]?.disabled) { e.preventDefault(); opts[2]?.on?.(); return; }
+			}
+
+			if (e.shiftKey) return;
+
 			switch (e.key) {
 				case 'k':
 				case 'K':
@@ -317,6 +361,7 @@
 		era={systemStore.era}
 		focusedTitle={focusedTitle()}
 		time={formatNow(now)}
+		viewOptions={viewOptions()}
 		onSetLang={(l) => systemStore.setLang(l)}
 		onSetEra={(e) => systemStore.setEra(e)}
 		onOpenAbout={() => openModule('about')}
