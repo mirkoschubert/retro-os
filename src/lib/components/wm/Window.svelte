@@ -39,6 +39,9 @@
 	$effect(() => {
 		if (!drag && !resz) return;
 
+		if (resz) document.documentElement.classList.add('cursor-resizing');
+		if (drag) document.documentElement.classList.add('cursor-dragging');
+
 		function onMove(e: MouseEvent) {
 			if (drag) {
 				wmStore.move(win.id, e.clientX - drag.ox, Math.max(0, e.clientY - drag.oy));
@@ -48,25 +51,40 @@
 				wmStore.resize(win.id, w, h);
 			}
 		}
-		function onUp() { drag = null; resz = null; }
+		function onUp() {
+			drag = null;
+			resz = null;
+			document.documentElement.classList.remove('cursor-resizing', 'cursor-dragging');
+			wmStore.saveLayout();
+		}
 
 		window.addEventListener('mousemove', onMove);
 		window.addEventListener('mouseup', onUp);
 		return () => {
 			window.removeEventListener('mousemove', onMove);
 			window.removeEventListener('mouseup', onUp);
+			document.documentElement.classList.remove('cursor-resizing', 'cursor-dragging');
 		};
 	});
 
 	const Comp = $derived(win.component);
+	// Trigger open animation only on true first mount (not restore from minimized).
+	import { untrack } from 'svelte';
+	let opening = $state(untrack(() => !win.minimized));
+	$effect(() => { requestAnimationFrame(() => { opening = false; }); });
 </script>
 
-{#if !win.minimized}
+{#if !win.minimized || win.closing || win.restoring}
 	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 	<div
 		class="window"
 		class:is-focused={isFocused}
-		style="left:{win.x}px;top:{win.y}px;width:{win.w}px;height:{win.h}px;z-index:{win.z}"
+		class:win-opening={opening}
+		class:win-closing={win.closing}
+		class:win-restoring={win.restoring}
+		class:is-dragging={!!drag}
+		class:is-resizing={!!resz}
+		style="transform:translate({win.x}px,{win.y}px);width:{win.w}px;height:{win.h}px;z-index:{win.z}"
 		onmousedown={() => wmStore.focus(win.id)}
 		onfocus={() => wmStore.focus(win.id)}
 		role="region"

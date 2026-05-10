@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { systemStore } from '$lib/stores/system.svelte.js';
-	import { wmStore } from '$lib/stores/wm.svelte.js';
+	import { wmStore, getPersistedSession } from '$lib/stores/wm.svelte.js';
 	import { getMessages } from '$lib/i18n.js';
 	import MenuBar from '$lib/components/shell/MenuBar.svelte';
 	import Dock from '$lib/components/shell/Dock.svelte';
@@ -71,14 +71,14 @@
 				title: 'Welcome',
 				titleKey: 'welcome_title',
 				component: Welcome as unknown as Component<Record<string, unknown>>,
-				x: 50, y: 40, w: 600, h: 550, minW: 320, minH: 240
+				x: 50, y: 40, w: 600, h: 600, minW: 320, minH: 240
 			},
 			{
 				id: 'projects',
 				title: 'Projects',
 				titleKey: 'mod_projects',
 				component: ProjectBrowser as unknown as Component<Record<string, unknown>>,
-				x: 80, y: 50, w: 720, h: 480, minW: 480, minH: 320
+				x: 80, y: 50, w: 940, h: 720, minW: 480, minH: 320
 			},
 			{
 				id: 'media',
@@ -99,7 +99,7 @@
 				title: 'Writer',
 				titleKey: 'mod_writer',
 				component: Writer as unknown as Component<Record<string, unknown>>,
-				x: 140, y: 65, w: 600, h: 520, minW: 400, minH: 360
+				x: 140, y: 65, w: 840, h: 720, minW: 400, minH: 360
 			},
 			{
 				id: 'sysinfo',
@@ -143,14 +143,13 @@
 		];
 	}
 
-	function openModule(id: string, extraProps?: Record<string, unknown>) {
+	function openModule(id: string, extraProps?: Record<string, unknown>, startMinimized?: boolean) {
 		const existing = wmStore.windows.find((w) => w.id === id);
 		if (existing) {
-			if (existing.minimized) {
-				wmStore.minimize(existing.id);
+			if (!startMinimized) {
+				wmStore.focus(existing.id);
+				if (extraProps) wmStore.updateProps(existing.id, extraProps);
 			}
-			wmStore.focus(existing.id);
-			if (extraProps) wmStore.updateProps(existing.id, extraProps);
 			return;
 		}
 		const defs = getModuleDefs();
@@ -180,17 +179,24 @@
 			w: def.w,
 			h: def.h,
 			minW: def.minW,
-			minH: def.minH
+			minH: def.minH,
+			startMinimized
 		});
 	}
 
-	onMount(() => {
+	function measureDesktop() {
+		const style = getComputedStyle(document.documentElement);
+		const menubarH = parseInt(style.getPropertyValue('--menubar-h')) || 26;
+		const dockH = parseInt(style.getPropertyValue('--dock-h')) || 64;
 		viewportW = window.innerWidth;
-		viewportH = window.innerHeight;
+		viewportH = window.innerHeight - menubarH - dockH - 24;
+	}
+
+	onMount(() => {
+		measureDesktop();
 
 		function onResize() {
-			viewportW = window.innerWidth;
-			viewportH = window.innerHeight;
+			measureDesktop();
 		}
 		window.addEventListener('resize', onResize);
 
@@ -213,9 +219,29 @@
 		}
 		window.addEventListener('retro-os:palette', onPalette);
 
-		openModule('welcome');
+		// Restore last session or fall back to Welcome on first visit
+		const session = getPersistedSession();
+		if (session.length > 0) {
+			// Sort by z so the highest-z window ends up focused last (on top)
+			const sorted = [...session].sort((a, b) => a.z - b.z);
+			for (const entry of sorted) {
+				openModule(entry.id, undefined, entry.minimized);
+			}
+		} else {
+			openModule('welcome');
+		}
 
 		function onKeyDown(e: KeyboardEvent) {
+			if (e.key === 'Escape') {
+				if (systemStore.paletteOpen) {
+					systemStore.closePalette();
+				} else {
+					const focused = wmStore.windows.find((w) => w.id === wmStore.focusedId);
+					if (focused) wmStore.close(focused.id);
+				}
+				return;
+			}
+
 			const meta = e.metaKey || e.ctrlKey;
 			if (!meta) return;
 
@@ -223,7 +249,8 @@
 				case 'k':
 				case 'K':
 					e.preventDefault();
-					systemStore.paletteOpen ? systemStore.closePalette() : systemStore.openPalette();
+					if (systemStore.paletteOpen) systemStore.closePalette();
+					else systemStore.openPalette();
 					break;
 				case '.':
 					e.preventDefault();
@@ -234,13 +261,6 @@
 					e.preventDefault();
 					systemStore.setLang(systemStore.lang === 'de' ? 'en' : 'de');
 					break;
-				case 'w':
-				case 'W': {
-					e.preventDefault();
-					const focused = wmStore.windows.find((w) => w.id === wmStore.focusedId);
-					if (focused) wmStore.close(focused.id);
-					break;
-				}
 				case '`':
 					e.preventDefault();
 					wmStore.cycle();
@@ -272,6 +292,10 @@
 				case '6':
 					e.preventDefault();
 					openModule('terminal');
+					break;
+				case '7':
+					e.preventDefault();
+					openModule('publications');
 					break;
 			}
 		}
