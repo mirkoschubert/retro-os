@@ -4,6 +4,7 @@
 	import { pickLocale } from '$lib/sanity/utils.js';
 	import { systemStore } from '$lib/stores/system.svelte.js';
 	import type { SysInfo } from '$lib/sanity/types.js';
+	import { ArrowRight } from '@lucide/svelte';
 
 	interface Props {
 		onOpenModule: (key: string) => void;
@@ -65,9 +66,13 @@
 				onmouseenter={(e) => (e.currentTarget.style.borderColor = 'var(--accent)')}
 				onmouseleave={(e) => (e.currentTarget.style.borderColor = 'var(--line-1)')}
 			>
-				<span class="kbd">{sc.kbd}</span>
+				<span style="display:inline-flex;align-items:center;gap:2px;flex-shrink:0">
+					{#each sc.kbd.split('') as ch}
+						<kbd class="shortcut-mod">{ch}</kbd>
+					{/each}
+				</span>
 				<span style="flex:1;font-size:13px">{t[sc.labelKey]()}</span>
-				<span style="color:var(--accent)">→</span>
+				<ArrowRight size={14} style="color:var(--accent);flex-shrink:0" />
 			</button>
 		{/each}
 	</div>

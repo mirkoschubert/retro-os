@@ -252,26 +252,35 @@ html[data-era="workbench"] .menu-dropdown { border-color: var(--accent); }
 .menu-dropdown-row.disabled { color: var(--text-3); cursor: default; }
 .menu-dropdown-row.disabled:hover { background: transparent; color: var(--text-3); }
 /* Fixed-width check column — keeps label text aligned whether or not a check is shown */
-.menu-dropdown-row::before {
-  content: "";
-  display: inline-block;
+.menu-dropdown-row .menu-check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: 18px;
   flex-shrink: 0;
-  font-family: var(--font-mono);
   color: var(--accent);
 }
-.menu-dropdown-row.checked::before { content: "\2713"; }
-.menu-dropdown-row:hover::before { color: var(--bg-0); }
+.menu-dropdown-row:hover .menu-check { color: var(--bg-0); }
 /* Label stretches to fill available space, pushing shortcut to the right */
 .menu-dropdown-row .menu-label { flex: 1; }
 .menu-dropdown-row .shortcut {
-  font-family: var(--font-mono);
-  font-size: 10.5px;
-  color: var(--text-2);
-  letter-spacing: 0.04em;
-  padding-left: 24px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding-left: 20px;
 }
-.menu-dropdown-row:hover .shortcut { color: var(--bg-0); }
+.shortcut-mod, .shortcut-key {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-2);
+  background: var(--bg-3);
+  border: 1px solid var(--line-2);
+  border-radius: 2px;
+  padding: 0 3px;
+  line-height: 1.6;
+}
+.menu-dropdown-row:hover .shortcut-mod,
+.menu-dropdown-row:hover .shortcut-key { color: var(--bg-0); background: transparent; border-color: var(--bg-0); }
 .menu-dropdown-divider { height: 1px; background: var(--line-1); margin: 4px 0; }
 .menu-dropdown-label {
   padding: 6px 14px 4px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
@@ -717,8 +726,9 @@ html[data-era="workbench"] .palette { border-radius: 0; border-color: var(--acce
   background: var(--bg-1);
   border-top: 1px solid var(--line-0);
   font-family: var(--font-mono); font-size: 10.5px; color: var(--text-3);
-  display: flex; gap: 16px;
+  display: flex; gap: 16px; align-items: center;
 }
+.palette-foot > span { display: inline-flex; align-items: center; gap: 4px; }
 
 /* ---------- scrollbars ---------- */
 * { scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; }
@@ -842,4 +852,7 @@ html[data-era="workbench"] .palette { border-radius: 0; border-color: var(--acce
   background: var(--bg-2);
   color: var(--text-1);
   letter-spacing: 0.03em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }

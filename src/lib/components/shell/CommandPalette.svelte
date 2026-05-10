@@ -3,6 +3,16 @@
 	import { pickLocale } from '$lib/sanity/utils.js';
 	import type { Lang, Era } from '$lib/stores/system.svelte.js';
 	import type { Project, Writing, Photo, Album, Publication } from '$lib/sanity/types.js';
+	import {
+		LayoutDashboard, Disc, Camera, BookOpen, Newspaper, Info, SquareTerminal,
+		Settings, FolderOpen, Image, Music2, FileText,
+		ArrowUp, ArrowDown, CornerDownLeft, X as IconX
+	} from '@lucide/svelte';
+
+	const kindIcon: Record<string, unknown> = {
+		PROG: LayoutDashboard, PROJ: FolderOpen, TEXT: FileText,
+		PHOT: Image, MUSC: Music2, PUB: Newspaper, PREF: Settings
+	};
 
 	interface Props {
 		open: boolean;
@@ -156,7 +166,9 @@
 						aria-selected={i === activeIdx}
 						tabindex="0"
 					>
-						<span class="row-icon">{item.kind[0]}</span>
+						<span class="row-icon">
+							{#if kindIcon[item.kind]}{@const Icon = kindIcon[item.kind] as any}<Icon size={13} strokeWidth={1.6} />{:else}{item.kind[0]}{/if}
+						</span>
 						<span style="flex:1">
 							{item.label}
 							{#if item.sub}
@@ -168,9 +180,9 @@
 				{/each}
 			</div>
 			<div class="palette-foot">
-				<span><span class="kbd">↑↓</span> {t.palette_navigate()}</span>
-				<span><span class="kbd">↵</span> {t.palette_open()}</span>
-				<span><span class="kbd">esc</span> {t.palette_close()}</span>
+				<span><span class="kbd"><ArrowUp size={10} /></span><span class="kbd"><ArrowDown size={10} /></span> {t.palette_navigate()}</span>
+				<span><span class="kbd"><CornerDownLeft size={10} /></span> {t.palette_open()}</span>
+				<span><span class="kbd" style="font-size:9px">esc</span> {t.palette_close()}</span>
 			</div>
 		</div>
 	</div>

@@ -4,6 +4,7 @@
 	import { systemStore } from '$lib/stores/system.svelte.js';
 	import { calcReadingTime, pickLocale } from '$lib/sanity/utils.js';
 	import type { Writing } from '$lib/sanity/types.js';
+	import { ChevronLeft, ChevronRight } from '@lucide/svelte';
 
 	interface Props {
 		winId?: string;
@@ -155,15 +156,15 @@
 
 					<div style="margin-top:36px;padding-top:18px;border-top:1px solid var(--line-1);display:flex;justify-content:space-between;font-size:11.5px" class="mono dim">
 						<button
-							style="background:none;border:none;padding:0;font-family:var(--font-mono);font-size:11.5px;cursor:{prevWriting ? 'pointer' : 'default'};color:{prevWriting ? 'var(--text-1)' : 'var(--text-3)'}"
+							style="background:none;border:none;padding:0;font-family:var(--font-mono);font-size:11.5px;cursor:{prevWriting ? 'pointer' : 'default'};color:{prevWriting ? 'var(--text-1)' : 'var(--text-3)'};display:inline-flex;align-items:center;gap:4px"
 							onclick={() => { if (prevWriting) selectedId = prevWriting._id; }}
 							disabled={!prevWriting}
-						>↩ {t.prev()}</button>
+						><ChevronLeft size={13} /> {t.prev()}</button>
 						<button
-							style="background:none;border:none;padding:0;font-family:var(--font-mono);font-size:11.5px;cursor:{nextWriting ? 'pointer' : 'default'};color:{nextWriting ? 'var(--text-1)' : 'var(--text-3)'}"
+							style="background:none;border:none;padding:0;font-family:var(--font-mono);font-size:11.5px;cursor:{nextWriting ? 'pointer' : 'default'};color:{nextWriting ? 'var(--text-1)' : 'var(--text-3)'};display:inline-flex;align-items:center;gap:4px"
 							onclick={() => { if (nextWriting) selectedId = nextWriting._id; }}
 							disabled={!nextWriting}
-						>{t.next()} ↪</button>
+						>{t.next()} <ChevronRight size={13} /></button>
 					</div>
 				</div>
 			{:else}

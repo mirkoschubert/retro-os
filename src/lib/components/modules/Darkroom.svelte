@@ -6,6 +6,7 @@
 	import { urlFor } from '$lib/sanity/image.js';
 	import { pickLocale } from '$lib/sanity/utils.js';
 	import type { Photo, PhotoSeries } from '$lib/sanity/types.js';
+	import { LayoutGrid, Image } from '@lucide/svelte';
 
 	interface Props {
 		winId?: string;
@@ -120,8 +121,8 @@
 
 <div class="module" style="flex-direction:column">
 	<div class="toolbar">
-		<button class="tb-btn" class:is-active={view === 'contact'} onclick={() => (view = 'contact')}>▦ {t.recent()}</button>
-		<button class="tb-btn" class:is-active={view === 'single'} onclick={() => (view = 'single')}>◉ {lang === 'de' ? 'Einzelansicht' : 'Single'}</button>
+		<button class="tb-btn" class:is-active={view === 'contact'} onclick={() => (view = 'contact')}><LayoutGrid size={14} /> {t.recent()}</button>
+		<button class="tb-btn" class:is-active={view === 'single'} onclick={() => (view = 'single')}><Image size={14} /> {lang === 'de' ? 'Einzelansicht' : 'Single'}</button>
 		<div class="sep"></div>
 
 		{#if photoSeries.length > 0}

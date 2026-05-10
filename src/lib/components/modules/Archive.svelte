@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { systemStore } from '$lib/stores/system.svelte.js';
+	import { ArrowUp, ArrowLeft, ArrowRight, Folder, Settings, FileText } from '@lucide/svelte';
 
 	interface Props {
 		onOpenModule: (key: string) => void;
@@ -49,9 +50,9 @@
 		<span class="tb-label mono">/</span>
 		<span class="mono" style="color:var(--text-1)">~ /Workspace</span>
 		<div class="sep"></div>
-		<button class="tb-btn">↑</button>
-		<button class="tb-btn">←</button>
-		<button class="tb-btn">→</button>
+		<button class="tb-btn"><ArrowUp size={13} /></button>
+		<button class="tb-btn"><ArrowLeft size={13} /></button>
+		<button class="tb-btn"><ArrowRight size={13} /></button>
 		<div style="flex:1"></div>
 		<span class="dim mono">{lang === 'de' ? '3 Bände' : '3 volumes'}</span>
 	</div>
@@ -78,7 +79,7 @@
 							>
 								<td style="padding:5px 14px;color:var(--text-0)">
 									<span class="mono" style="display:inline-block;width:10px;margin-right:8px;color:var(--accent)">
-										{item.kind === 'dir' ? '▦' : item.kind === 'sys' ? '◇' : '·'}
+										{#if item.kind === 'dir'}<Folder size={12} />{:else if item.kind === 'sys'}<Settings size={12} />{:else}<FileText size={12} />{/if}
 									</span>
 									{item.name}
 								</td>

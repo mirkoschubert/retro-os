@@ -4,6 +4,7 @@
 	import { pickLocale } from '$lib/sanity/utils.js';
 	import { urlFor } from '$lib/sanity/image.js';
 	import type { Project } from '$lib/sanity/types.js';
+	import { LayoutList, LayoutGrid, Search } from '@lucide/svelte';
 
 	interface Props {
 		winId?: string;
@@ -50,10 +51,10 @@
 		<button class="tb-btn" class:is-active={filter === 'personal'} onclick={() => (filter = 'personal')}>{msg.personal()}</button>
 		<button class="tb-btn" class:is-active={filter === 'clients'} onclick={() => (filter = 'clients')}>{msg.clients()}</button>
 		<div class="sep"></div>
-		<button class="tb-btn" class:is-active={view === 'list'} onclick={() => (view = 'list')}>≡ {msg.view_list()}</button>
-		<button class="tb-btn" class:is-active={view === 'grid'} onclick={() => (view = 'grid')}>▦ {msg.view_grid()}</button>
+		<button class="tb-btn" class:is-active={view === 'list'} onclick={() => (view = 'list')}><LayoutList size={14} /></button>
+		<button class="tb-btn" class:is-active={view === 'grid'} onclick={() => (view = 'grid')}><LayoutGrid size={14} /></button>
 		<div style="flex:1"></div>
-		<span class="tb-label">⌕</span>
+		<span class="tb-label"><Search size={13} /></span>
 		<input type="search" placeholder="{msg.search()}…" bind:value={search} />
 		<span class="dim mono" style="margin-left:6px">{filtered.length} / {projects.length}</span>
 	</div>

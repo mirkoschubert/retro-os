@@ -3,6 +3,7 @@
 	import type { WindowState } from '$lib/stores/wm.svelte.js';
 	import { getMessages } from '$lib/i18n.js';
 	import { systemStore } from '$lib/stores/system.svelte.js';
+	import { X, Minus, Square } from '@lucide/svelte';
 
 	interface Props {
 		win: WindowState;
@@ -104,25 +105,19 @@
 					title="Close"
 					onclick={(e) => { e.stopPropagation(); wmStore.close(win.id); }}
 					aria-label="Close window"
-				>
-					<svg viewBox="0 0 8 8"><path d="M1 1L7 7M7 1L1 7" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
-				</button>
+				><X size={9} strokeWidth={2} /></button>
 				<button
 					class="win-btn"
 					title="Minimize"
 					onclick={(e) => { e.stopPropagation(); wmStore.minimize(win.id); }}
 					aria-label="Minimize window"
-				>
-					<svg viewBox="0 0 8 8"><path d="M1 6h6" stroke="currentColor" stroke-width="1.2" fill="none"/></svg>
-				</button>
+				><Minus size={9} strokeWidth={2} /></button>
 				<button
 					class="win-btn"
 					title="Zoom"
 					onclick={(e) => { e.stopPropagation(); wmStore.toggleZoom(win.id, viewport); }}
 					aria-label="Zoom window"
-				>
-					<svg viewBox="0 0 8 8"><rect x="1" y="1" width="6" height="6" stroke="currentColor" stroke-width="1" fill="none"/></svg>
-				</button>
+				><Square size={9} strokeWidth={2} /></button>
 			</div>
 			<div class="titlebar-title">{displayTitle}</div>
 			<div class="win-controls win-controls-right" style="visibility:hidden">

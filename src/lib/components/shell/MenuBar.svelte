@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getMessages } from '$lib/i18n.js';
 	import type { Era, Lang } from '$lib/stores/system.svelte.js';
+	import { Check } from '@lucide/svelte';
 
 	interface ViewOption {
 		row: string;
@@ -183,9 +184,10 @@
 								tabindex={d.disabled ? -1 : 0}
 								onkeydown={(e) => { if (e.key === 'Enter' && !d.disabled && d.on) d.on(); }}
 							>
+								<span class="menu-check">{#if d.checked}<Check size={11} strokeWidth={2.5} />{/if}</span>
 								<span class="menu-label">{d.row}</span>
 								{#if d.shortcut}
-									<span class="shortcut">{d.shortcut}</span>
+									<span class="shortcut">{#each d.shortcut.split('') as ch}{#if ch === '⌘' || ch === '⇧' || ch === '⌃' || ch === '⌥'}<kbd class="shortcut-mod">{ch}</kbd>{:else}<kbd class="shortcut-key">{ch}</kbd>{/if}{/each}</span>
 								{/if}
 							</div>
 						{/if}
