@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { SvelteMap } from 'svelte/reactivity';
 	import { getMessages } from '$lib/i18n.js';
 	import { systemStore } from '$lib/stores/system.svelte.js';
 	import { urlForAudioFile } from '$lib/sanity/utils.js';
@@ -43,7 +44,10 @@
 	let duration = $state(0);
 	let vol = $state(0.62);
 	let audioEl = $state<HTMLAudioElement | null>(null);
-	let trackDurations = $state<Map<string, number>>(new Map());
+	// Plain map - only durationsVersion is reactive (increments once per loaded track, not per timeupdate)
+	const trackDurations = new SvelteMap<string, number>();
+	let durationsVersion = $state(0);
+	let rafId: number | null = null;
 
 	const allTracks = $derived(
 		albums.flatMap((a) =>
@@ -59,8 +63,11 @@
 	);
 
 	const currentTrack = $derived(allTracks.find((t) => t._key === playingKey) ?? null);
+	const currentCoverUrl = $derived(
+		currentTrack?.albumCover ? albumCoverUrl(currentTrack.albumCover, 112) : null
+	);
 
-	// Preload metadata for all tracks to get durations without downloading audio data
+	// Preload metadata for all tracks — mutations go into the plain Map, no reactive re-render
 	$effect(() => {
 		for (const tr of allTracks) {
 			if (!tr.audioFile?.asset?._ref || trackDurations.has(tr._key)) continue;
@@ -69,9 +76,8 @@
 			a.preload = 'metadata';
 			a.addEventListener('loadedmetadata', () => {
 				if (isFinite(a.duration)) {
-					const next = new Map(trackDurations);
-					next.set(tr._key, a.duration);
-					trackDurations = next;
+					trackDurations.set(tr._key, a.duration);
+					durationsVersion += 1;
 				}
 			}, { once: true });
 			a.src = url;
@@ -83,12 +89,19 @@
 
 		function onTimeUpdate() {
 			if (!audioEl) return;
-			currentTime = audioEl.currentTime;
-			duration = isFinite(audioEl.duration) ? audioEl.duration : 0;
-			progress = duration > 0 ? currentTime / duration : 0;
+			// Throttle Svelte state updates to one per animation frame
+			if (rafId !== null) return;
+			rafId = requestAnimationFrame(() => {
+				rafId = null;
+				if (!audioEl) return;
+				currentTime = audioEl.currentTime;
+				duration = isFinite(audioEl.duration) ? audioEl.duration : 0;
+				progress = duration > 0 ? currentTime / duration : 0;
+			});
 		}
 
 		function onEnded() {
+			if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
 			isPlaying = false;
 			playNext();
 		}
@@ -103,6 +116,7 @@
 		audioEl.addEventListener('loadedmetadata', onLoadedMetadata);
 
 		return () => {
+			if (rafId !== null) { cancelAnimationFrame(rafId); rafId = null; }
 			audioEl!.removeEventListener('timeupdate', onTimeUpdate);
 			audioEl!.removeEventListener('ended', onEnded);
 			audioEl!.removeEventListener('loadedmetadata', onLoadedMetadata);
@@ -118,7 +132,7 @@
 		return urlForAudioFile(track.audioFile.asset._ref);
 	}
 
-	const audioBlobCache = new Map<string, string>();
+	const audioBlobCache = new SvelteMap<string, string>();
 
 	async function resolveAudioSrc(url: string): Promise<string> {
 		if (audioBlobCache.has(url)) return audioBlobCache.get(url)!;
@@ -307,7 +321,7 @@
 								<td style="padding:6px 14px;text-align:right" class="mono">
 									{#if active}
 										{formatTime(duration)}
-									{:else if trackDurations.has(tr._key)}
+									{:else if durationsVersion >= 0 && trackDurations.has(tr._key)}
 										{formatTime(trackDurations.get(tr._key)!)}
 									{:else}
 										-:--
@@ -352,9 +366,9 @@
 
 	<!-- Transport bar -->
 	<div style="height:78px;flex-shrink:0;background:var(--bg-2);border-top:1px solid var(--line-0);display:flex;align-items:center;padding:0 18px;gap:16px">
-		{#if currentTrack && albumCoverUrl(currentTrack.albumCover, 112)}
+		{#if currentTrack && currentCoverUrl}
 			<img
-				src={albumCoverUrl(currentTrack.albumCover, 112)!}
+				src={currentCoverUrl}
 				alt={currentTrack.albumTitle}
 				style="width:56px;height:56px;object-fit:cover;flex-shrink:0"
 			/>

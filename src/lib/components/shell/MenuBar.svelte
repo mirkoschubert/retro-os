@@ -168,7 +168,7 @@
 								tabindex={d.disabled ? -1 : 0}
 								onkeydown={(e) => { if (e.key === 'Enter' && !d.disabled && d.on) d.on(); }}
 							>
-								<span>{d.row}</span>
+								<span class="menu-label">{d.row}</span>
 								{#if d.shortcut}
 									<span class="shortcut">{d.shortcut}</span>
 								{/if}

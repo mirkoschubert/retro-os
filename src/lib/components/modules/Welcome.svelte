@@ -1,27 +1,39 @@
 <script lang="ts">
 	import { getMessages } from '$lib/i18n.js';
-	import { SYS, pickL } from '$lib/data/placeholder.js';
+	import { SYS } from '$lib/data/placeholder.js';
+	import { pickLocale } from '$lib/sanity/utils.js';
 	import { systemStore } from '$lib/stores/system.svelte.js';
+	import type { SysInfo } from '$lib/sanity/types.js';
 
 	interface Props {
 		onOpenModule: (key: string) => void;
+		sysInfo?: SysInfo | null;
 		winId?: string;
 	}
 
-	const { onOpenModule }: Props = $props();
+	const { onOpenModule, sysInfo }: Props = $props();
 	const lang = $derived(systemStore.lang);
 	const t = $derived(getMessages(lang));
 
 	const today = new Date().toISOString().slice(0, 10);
 
 	const shortcuts = [
-		{ kbd: '⌘1', labelKey: 'mod_projects' as const, key: 'projects' },
-		{ kbd: '⌘2', labelKey: 'mod_media' as const,    key: 'media' },
-		{ kbd: '⌘3', labelKey: 'mod_darkroom' as const, key: 'darkroom' },
-		{ kbd: '⌘4', labelKey: 'mod_writer' as const,   key: 'writer' },
-		{ kbd: '⌘K', labelKey: 'cmd_palette' as const,  key: 'palette' },
-		{ kbd: '⌘.', labelKey: 'console' as const,      key: 'terminal' }
+		{ kbd: '⌘1', labelKey: 'mod_projects'    as const, key: 'projects'     },
+		{ kbd: '⌘2', labelKey: 'mod_media'        as const, key: 'media'        },
+		{ kbd: '⌘3', labelKey: 'mod_darkroom'     as const, key: 'darkroom'     },
+		{ kbd: '⌘4', labelKey: 'mod_writer'       as const, key: 'writer'       },
+		{ kbd: '⌘5', labelKey: 'mod_sysinfo'      as const, key: 'sysinfo'      },
+		{ kbd: '⌘7', labelKey: 'mod_publications' as const, key: 'publications' },
+		{ kbd: '⌘K', labelKey: 'cmd_palette'      as const, key: 'palette'      },
+		{ kbd: '⌘.', labelKey: 'console'          as const, key: 'terminal'     },
 	];
+
+	const availableFor = $derived(
+		sysInfo?.available_for
+			? pickLocale(lang, sysInfo.available_for)
+			: SYS.available_for[lang]
+	);
+	const email = $derived(sysInfo?.email ?? SYS.email);
 
 	function handleShortcut(key: string) {
 		if (key === 'palette') {
@@ -37,7 +49,7 @@
 		~/Workspace · {today}
 	</div>
 	<h1 class="serif" style="font-family:var(--font-display);font-size:30px;font-weight:600;margin:0 0 16px;letter-spacing:-0.005em">
-		{t.welcome_title()}, mirko.
+		{t.welcome_title()}
 	</h1>
 	<div style="max-width:540px">
 		<p style="font-size:13.5px;color:var(--text-1);line-height:1.7;margin:0 0 12px">{t.welcome_body_1()}</p>
@@ -61,6 +73,6 @@
 	</div>
 
 	<div class="mono dim" style="font-size:10.5px;margin-top:22px;letter-spacing:0.06em">
-		{t.available()}: {pickL(lang, SYS.available_for)} · <span style="color:var(--accent)">{SYS.email}</span>
+		{t.available()}: {availableFor} · <span style="color:var(--accent)">{email}</span>
 	</div>
 </div>

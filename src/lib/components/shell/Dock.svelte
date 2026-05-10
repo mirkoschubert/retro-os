@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getMessages } from '$lib/i18n.js';
 	import { systemStore } from '$lib/stores/system.svelte.js';
+	import { wmStore } from '$lib/stores/wm.svelte.js';
 	import DockGlyph from './DockGlyph.svelte';
 
 	interface Props {
@@ -9,6 +10,14 @@
 	}
 
 	const { activeKeys, onOpenModule }: Props = $props();
+
+	function handleDockClick(key: string) {
+		if (activeKeys.includes(key)) {
+			wmStore.toggleMinimize(key);
+		} else {
+			onOpenModule(key);
+		}
+	}
 	const lang = $derived(systemStore.lang);
 	const t = $derived(getMessages(lang));
 
@@ -31,7 +40,7 @@
 		<button
 			class="dock-item"
 			class:is-active={activeKeys.includes(item.key)}
-			onclick={() => onOpenModule(item.key)}
+			onclick={() => handleDockClick(item.key)}
 			title={item.label}
 		>
 			<DockGlyph kind={item.key} />

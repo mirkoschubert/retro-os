@@ -117,11 +117,16 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
-  user-select: none;
 }
 ::selection { background: var(--selection); color: var(--text-0); }
 button { font: inherit; color: inherit; cursor: pointer; }
 input, textarea { font: inherit; color: inherit; }
+
+/* Force cursor during drag/resize — overrides all element-level cursor styles */
+html.cursor-resizing, html.cursor-resizing * { cursor: nwse-resize !important; }
+html.cursor-dragging, html.cursor-dragging * { cursor: grabbing !important; }
+/* Prevent accidental text selection while dragging or resizing windows */
+html.cursor-dragging, html.cursor-resizing { user-select: none; }
 
 /* ---------- desktop background ---------- */
 
@@ -238,20 +243,33 @@ html[data-era="atelier"] .menubar-logo-mark::after { border-radius: 50%; }
 }
 html[data-era="workbench"] .menu-dropdown { border-color: var(--accent); }
 .menu-dropdown-row {
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 24px;
-  padding: 5px 14px;
+  display: flex; align-items: center;
+  padding: 5px 14px 5px 6px;
   color: var(--text-1);
   cursor: pointer;
 }
 .menu-dropdown-row:hover { background: var(--accent); color: var(--bg-0); }
 .menu-dropdown-row.disabled { color: var(--text-3); cursor: default; }
 .menu-dropdown-row.disabled:hover { background: transparent; color: var(--text-3); }
+/* Fixed-width check column — keeps label text aligned whether or not a check is shown */
+.menu-dropdown-row::before {
+  content: "";
+  display: inline-block;
+  width: 18px;
+  flex-shrink: 0;
+  font-family: var(--font-mono);
+  color: var(--accent);
+}
+.menu-dropdown-row.checked::before { content: "\2713"; }
+.menu-dropdown-row:hover::before { color: var(--bg-0); }
+/* Label stretches to fill available space, pushing shortcut to the right */
+.menu-dropdown-row .menu-label { flex: 1; }
 .menu-dropdown-row .shortcut {
   font-family: var(--font-mono);
   font-size: 10.5px;
   color: var(--text-2);
   letter-spacing: 0.04em;
+  padding-left: 24px;
 }
 .menu-dropdown-row:hover .shortcut { color: var(--bg-0); }
 .menu-dropdown-divider { height: 1px; background: var(--line-1); margin: 4px 0; }
@@ -259,16 +277,12 @@ html[data-era="workbench"] .menu-dropdown { border-color: var(--accent); }
   padding: 6px 14px 4px; font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--text-3); font-family: var(--font-mono);
 }
-.menu-dropdown-row.checked::before {
-  content: "\2713"; margin-right: -10px; color: var(--accent);
-  font-family: var(--font-mono);
-}
-.menu-dropdown-row:hover.checked::before { color: var(--bg-0); }
 
 /* ---------- window ---------- */
 
 .window {
   position: absolute;
+  top: 0; left: 0;
   background: var(--bg-1);
   border: 1px solid var(--line-0);
   border-radius: var(--window-radius);
@@ -277,15 +291,42 @@ html[data-era="workbench"] .menu-dropdown { border-color: var(--accent); }
   min-width: 280px; min-height: 160px;
   font-family: var(--font-body);
   overflow: hidden;
+  will-change: transform;
 }
 .window.is-focused { box-shadow: var(--shadow), 0 0 0 1px var(--bevel-light) inset, 0 0 0 1px var(--accent) inset; }
 html[data-era="workbench"] .window { box-shadow: 4px 4px 0 rgba(0,0,0,0.6); border-color: var(--accent); }
 html[data-era="workbench"] .window.is-focused { border-color: var(--accent); box-shadow: 4px 4px 0 rgba(0,0,0,0.6), 0 0 0 1px var(--accent) inset; }
-.window.is-minimizing { opacity: 0; transform: scale(0.5) translateY(200px); transition: all 0.18s ease-out; }
-.window.is-restoring { animation: win-in 0.18s ease-out; }
-@keyframes win-in {
-  from { opacity: 0; transform: scale(0.96); }
-  to { opacity: 1; transform: scale(1); }
+/* translate() is set inline via style; scale/opacity animate independently */
+.win-opening {
+  animation: win-open 0.15s cubic-bezier(0.2, 0, 0.3, 1) both;
+}
+.win-closing {
+  animation: win-close 0.14s cubic-bezier(0.4, 0, 1, 1) both;
+  pointer-events: none;
+}
+.win-restoring {
+  animation: win-restore 0.18s cubic-bezier(0.2, 0, 0.3, 1) both;
+}
+.window {
+  transition: width 0.18s cubic-bezier(0.2, 0, 0.3, 1),
+              height 0.18s cubic-bezier(0.2, 0, 0.3, 1),
+              transform 0.18s cubic-bezier(0.2, 0, 0.3, 1);
+}
+/* Disable size/position transition during drag/resize — added via JS class */
+.window.is-dragging, .window.is-resizing {
+  transition: none;
+}
+@keyframes win-open {
+  from { opacity: 0; scale: 0.93; }
+  to   { opacity: 1; scale: 1; }
+}
+@keyframes win-close {
+  from { opacity: 1; scale: 1; }
+  to   { opacity: 0; scale: 0.93; }
+}
+@keyframes win-restore {
+  from { opacity: 0; scale: 0.96; }
+  to   { opacity: 1; scale: 1; }
 }
 
 .titlebar {
@@ -302,6 +343,7 @@ html[data-era="workbench"] .window.is-focused { border-color: var(--accent); box
   position: relative;
   flex-shrink: 0;
   box-shadow: 0 1px 0 var(--bevel-light) inset;
+  user-select: none;
 }
 .titlebar:active { cursor: grabbing; }
 .window:not(.is-focused) .titlebar {
@@ -315,7 +357,7 @@ html[data-era="workbench"] .titlebar {
   box-shadow: none;
 }
 html[data-era="workbench"] .window:not(.is-focused) .titlebar {
-  background: var(--bg-3); color: var(--text-2);
+  background: var(--bg-3); color: var(--text-1);
 }
 html[data-era="atelier"] .titlebar {
   background:
@@ -324,18 +366,20 @@ html[data-era="atelier"] .titlebar {
 }
 html[data-era="atelier"] .window:not(.is-focused) .titlebar {
   background: var(--bg-2);
+  color: var(--text-2);
 }
 
 .titlebar-title {
   flex: 1;
   text-align: center;
   font-weight: 500;
-  color: var(--text-0);
+  color: inherit;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   padding: 0 8px;
   pointer-events: none;
 }
-html[data-era="workbench"] .titlebar-title { color: var(--bg-0); text-align: left; }
+html[data-era="workbench"] .titlebar-title { text-align: left; }
+html[data-era="workbench"] .window.is-focused .titlebar-title { color: var(--bg-0); }
 
 .win-controls { display: flex; gap: 6px; align-items: center; }
 .win-btn {
@@ -361,16 +405,20 @@ html[data-era="workbench"] .win-btn { border-color: var(--bg-0); background: var
   background: var(--bg-1);
   display: flex; flex-direction: column;
   position: relative;
+  user-select: text;
 }
 
 .resize-handle {
   position: absolute;
-  width: 14px; height: 14px;
   right: 0; bottom: 0;
+  width: 28px; height: 28px;
   cursor: nwse-resize;
+  z-index: 1;
   background:
-    linear-gradient(135deg, transparent 0 50%, var(--line-2) 50% 55%, transparent 55% 65%, var(--line-2) 65% 70%, transparent 70% 80%, var(--line-2) 80% 85%, transparent 85%);
-  z-index: 5;
+    linear-gradient(135deg, transparent 0 57%, var(--line-2) 57% 62%, transparent 62% 68%, var(--line-2) 68% 73%, transparent 73% 79%, var(--line-2) 79% 84%, transparent 84%);
+  background-size: 14px 14px;
+  background-position: bottom right;
+  background-repeat: no-repeat;
 }
 
 /* ---------- dock ---------- */
@@ -691,8 +739,8 @@ html[data-era="workbench"] .palette { border-radius: 0; border-color: var(--acce
     transform: none !important;
     top: auto !important; left: auto !important;
     margin-bottom: 12px;
-    box-shadow: var(--shadow);
   }
+  .desktop.tablet .window { box-shadow: var(--shadow); }
   .desktop.tablet { padding: 12px 12px 80px; overflow-y: auto; display: block; }
   .desktop.tablet .resize-handle { display: none; }
   .desktop.tablet .titlebar { cursor: default; }
@@ -709,11 +757,13 @@ html[data-era="workbench"] .palette { border-radius: 0; border-color: var(--acce
     inset: var(--menubar-h) 0 var(--dock-h) 0 !important;
     width: 100% !important;
     height: auto !important;
-    border-radius: 0;
-    border-left: 0; border-right: 0;
     transform: none !important;
     top: var(--menubar-h) !important; left: 0 !important;
     z-index: 50 !important;
+  }
+  .desktop.mobile .window {
+    border-radius: 0;
+    border-left: 0; border-right: 0;
   }
   .desktop.mobile .window:not(.is-focused) { display: none; }
   .desktop.mobile .resize-handle { display: none; }

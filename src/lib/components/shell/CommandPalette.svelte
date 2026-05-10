@@ -116,7 +116,7 @@
 		if (e.key === 'ArrowDown') { e.preventDefault(); activeIdx = Math.min(activeIdx + 1, items.length - 1); }
 		else if (e.key === 'ArrowUp') { e.preventDefault(); activeIdx = Math.max(activeIdx - 1, 0); }
 		else if (e.key === 'Enter' && items[activeIdx]) { choose(items[activeIdx]); }
-		else if (e.key === 'Escape') { onClose(); }
+		else if (e.key === 'Escape') { e.stopPropagation(); onClose(); }
 	}
 </script>
 
