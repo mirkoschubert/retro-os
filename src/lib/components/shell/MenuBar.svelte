@@ -157,7 +157,7 @@
 	</div>
 
 	{#each items as item (item.key)}
-		<div style="position:relative">
+		<div style="position:relative" class:mobile-hidden={item.key === 'edit' || item.key === 'win'}>
 			<button
 				class="menu-item"
 				class:is-app={item.app}
@@ -199,7 +199,7 @@
 
 	<div class="menu-spacer"></div>
 	<div class="menu-status">
-		<span>{focusedTitle ?? t.desktop()}</span>
+		<span class="desktop-only">{focusedTitle ?? t.desktop()}</span>
 		<button
 			class="pill"
 			onclick={() => onSetLang(lang === 'en' ? 'de' : 'en')}
@@ -208,6 +208,6 @@
 			<span class="dot"></span>
 			{lang === 'en' ? 'EN' : 'DE'}
 		</button>
-		<span>{time}</span>
+		<span class="desktop-only">{time}</span>
 	</div>
 </div>

@@ -71,6 +71,7 @@
 	// Context-sensitive view options depending on the focused window + its internal state
 	const viewOptions = $derived((): ViewOption[] => {
 		const focused = wmStore.windows.find((w) => w.id === wmStore.focusedId);
+		const isMobile = systemStore.deviceClass === 'mobile';
 		if (focused?.id === 'projects') {
 			const projectView = (focused.props.projectView as 'grid' | 'list' | undefined) ?? 'list';
 			return [
@@ -79,14 +80,27 @@
 					on: () => wmStore.updateProps('projects', { projectView: 'grid' })
 				},
 				{
-					row: pageT.view_list(), shortcut: '⌘⇧2', disabled: false, checked: projectView === 'list',
-					on: () => wmStore.updateProps('projects', { projectView: 'list' })
+					row: pageT.view_columns(), shortcut: '⌘⇧2', disabled: isMobile, checked: projectView === 'list',
+					on: isMobile ? undefined : () => wmStore.updateProps('projects', { projectView: 'list' })
 				}
 			];
 		}
 		if (focused?.id === 'darkroom') {
 			return [
 				{ row: pageT.view_grid(), shortcut: '⌘⇧1', disabled: false, checked: true }
+			];
+		}
+		if (focused?.id === 'writer') {
+			const writerView = (focused.props.writerView as 'list' | 'columns' | undefined) ?? 'columns';
+			return [
+				{
+					row: pageT.view_list(), shortcut: '⌘⇧1', disabled: false, checked: writerView === 'list',
+					on: () => wmStore.updateProps('writer', { writerView: 'list' })
+				},
+				{
+					row: pageT.view_columns(), shortcut: '⌘⇧2', disabled: isMobile, checked: writerView === 'columns',
+					on: isMobile ? undefined : () => wmStore.updateProps('writer', { writerView: 'columns' })
+				}
 			];
 		}
 		if (focused?.id === 'media') {

@@ -5,7 +5,7 @@
 	import { pickLocale } from '$lib/sanity/utils.js';
 	import { urlFor } from '$lib/sanity/image.js';
 	import type { Project } from '$lib/sanity/types.js';
-	import { LayoutList, LayoutGrid, Search, ArrowLeft } from '@lucide/svelte';
+	import { Columns2, LayoutGrid, Search, ArrowLeft } from '@lucide/svelte';
 
 	interface Props {
 		winId?: string;
@@ -80,7 +80,7 @@
 				class:is-disabled={systemStore.deviceClass === 'mobile'}
 				disabled={systemStore.deviceClass === 'mobile'}
 				onclick={() => setView('list')}
-			><LayoutList size={14} /></button>
+			><Columns2 size={14} /></button>
 			<button class="tb-btn" class:is-active={effectiveView === 'grid'} onclick={() => setView('grid')}><LayoutGrid size={14} /></button>
 		{/if}
 		<div style="flex:1"></div>

@@ -7,6 +7,7 @@
 	import { pickLocale } from '$lib/sanity/utils.js';
 	import type { Photo, PhotoSeries } from '$lib/sanity/types.js';
 	import { LayoutGrid, Image } from '@lucide/svelte';
+	import TbSelect from '$lib/components/ui/TbSelect.svelte';
 
 	interface Props {
 		winId?: string;
@@ -109,6 +110,14 @@
 		}
 	});
 
+	const seriesOptions = $derived([
+		{ value: '', label: lang === 'de' ? 'Alle Serien' : 'All series' },
+		...photoSeries.map((s) => ({
+			value: s._id,
+			label: `${pickLocale(lang, s.title)} (${s.photoCount})`
+		}))
+	]);
+
 	const selectedMeta = $derived({
 		camera:   selected?.camera,
 		lens:     selected?.lens,
@@ -126,19 +135,11 @@
 		<div class="sep"></div>
 
 		{#if photoSeries.length > 0}
-			<select
-				class="tb-select mono"
+			<TbSelect
+				options={seriesOptions}
 				value={selectedSeriesId ?? ''}
-				onchange={(e) => {
-					const v = (e.target as HTMLSelectElement).value;
-					selectedSeriesId = v === '' ? null : v;
-				}}
-			>
-				<option value="">{lang === 'de' ? 'Alle Serien' : 'All series'}</option>
-				{#each photoSeries as s (s._id)}
-					<option value={s._id}>{pickLocale(lang, s.title)} ({s.photoCount})</option>
-				{/each}
-			</select>
+				onChange={(v) => { selectedSeriesId = v === '' ? null : v; }}
+			/>
 			<div class="sep"></div>
 		{/if}
 
@@ -333,18 +334,6 @@
 		}
 	}
 
-	.tb-select {
-		background: var(--bg-1);
-		border: 1px solid var(--line-0);
-		color: var(--text-1);
-		font-size: 11px;
-		padding: 2px 6px;
-		height: 22px;
-		cursor: pointer;
-	}
-	.tb-select:focus {
-		outline: 1px solid var(--accent);
-	}
 	.meta-chip {
 		font-size: 10.5px;
 		letter-spacing: 0.05em;

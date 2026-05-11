@@ -219,12 +219,18 @@ html[data-era="atelier"] .menubar-logo-mark::after { border-radius: 50%; }
 }
 .menu-status .pill {
   display: inline-flex; align-items: center; gap: 6px;
-  padding: 2px 8px;
-  border: 1px solid var(--line-1);
-  background: var(--bg-1);
+  padding: 0 14px;
+  border: none;
+  border-left: 1px solid var(--line-1);
+  border-right: 1px solid var(--line-1);
+  background: transparent;
   cursor: pointer;
+  align-self: stretch;
+  color: var(--text-2);
+  font-family: var(--font-mono);
+  font-size: 11px;
 }
-.menu-status .pill:hover { border-color: var(--accent); color: var(--text-0); }
+.menu-status .pill:hover { color: var(--text-0); }
 .menu-status .dot {
   width: 6px; height: 6px; background: var(--accent-2); border-radius: 50%;
 }
@@ -557,6 +563,7 @@ html[data-era="workbench"] .list-row.is-active { background: var(--accent); colo
 html[data-era="workbench"] .toolbar .tb-btn { border-radius: 0; }
 .toolbar .tb-btn:hover { border-color: var(--accent); color: var(--text-0); }
 .toolbar .tb-btn.is-active { background: var(--accent); color: var(--bg-0); border-color: var(--accent); font-weight: inherit; }
+.toolbar .tb-btn:disabled, .toolbar .tb-btn.is-disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
 .toolbar .sep { width: 1px; height: 14px; background: var(--line-1); }
 .toolbar input[type="text"], .toolbar input[type="search"] {
   background: var(--bg-1);
@@ -752,8 +759,14 @@ html[data-era="workbench"] .palette { border-radius: 0; border-color: var(--acce
 /* TODO: Mobile layout needs a proper overhaul - currently a basic port of the prototype */
 @media (max-width: 640px) {
   /* Mobile - single fullscreen module */
-  .menu-status { display: none; }
+  .menu-status .desktop-only { display: none; }
   .menubar-logo { padding: 0 8px; }
+  .mobile-hidden { display: none; }
+  .menu-spacer { display: none; }
+  .menu-status { margin-left: auto; flex-shrink: 0; }
+  .menubar { overflow: hidden; }
+  .menu-status { padding-right: 0; }
+  .menu-status .pill { border-right: none; }
   .desktop.mobile { padding: 0; }
   .desktop.mobile .window {
     position: fixed !important;
