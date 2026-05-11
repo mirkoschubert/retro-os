@@ -84,6 +84,11 @@
 				}
 			];
 		}
+		if (focused?.id === 'darkroom') {
+			return [
+				{ row: pageT.view_grid(), shortcut: '⌘⇧1', disabled: false, checked: true }
+			];
+		}
 		if (focused?.id === 'media') {
 			const currentView = (focused.props.view as string | undefined) ?? 'albums';
 			if (currentView === 'albums') {

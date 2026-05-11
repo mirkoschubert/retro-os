@@ -181,11 +181,11 @@
 			</div>
 		</div>
 	{:else if selected}
-		<div style="flex:1;display:flex;overflow:hidden">
-			<!-- Filmstrip -->
+		<div class="single-layout">
+					<!-- Filmstrip: vertical sidebar on desktop, horizontal strip on mobile -->
 			<div
 				bind:this={filmstripEl}
-				style="width:110px;background:var(--bg-2);border-right:1px solid var(--line-0);overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:8px"
+				class="filmstrip"
 			>
 				{#each filteredPhotos as p, i (p._id)}
 					<button
@@ -232,7 +232,7 @@
 				</div>
 
 				<!-- Metadata strip -->
-				<div style="border-top:1px solid var(--line-0);background:var(--bg-2);padding:12px 18px;display:grid;grid-template-columns:1fr 280px;gap:24px;align-items:center">
+				<div class="meta-strip">
 					<div>
 						<div class="serif" style="font-size:16px;color:var(--text-0);margin-bottom:6px">{pickLocale(lang, selected.title)}</div>
 						<div style="display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin-bottom:4px">
@@ -274,6 +274,65 @@
 </div>
 
 <style>
+	.single-layout {
+		flex: 1;
+		display: flex;
+		overflow: hidden;
+	}
+
+	.filmstrip {
+		width: 110px;
+		background: var(--bg-2);
+		border-right: 1px solid var(--line-0);
+		overflow-y: auto;
+		padding: 8px;
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		flex-shrink: 0;
+	}
+
+	.meta-strip {
+		border-top: 1px solid var(--line-0);
+		background: var(--bg-2);
+		padding: 12px 18px;
+		display: grid;
+		grid-template-columns: 1fr 280px;
+		gap: 24px;
+		align-items: center;
+	}
+
+	@media (max-width: 640px) {
+		.single-layout {
+			flex-direction: column;
+		}
+		.filmstrip {
+			width: auto;
+			height: 72px;
+			flex-direction: row;
+			overflow-x: auto;
+			overflow-y: hidden;
+			border-right: none;
+			border-bottom: 1px solid var(--line-0);
+			padding: 6px 8px;
+			flex-shrink: 0;
+		}
+		.filmstrip :global(button) {
+			flex-shrink: 0;
+			width: 96px;
+		}
+		.filmstrip :global(img),
+		.filmstrip :global(.ph-image) {
+			width: 96px;
+			aspect-ratio: 3/2;
+		}
+		.meta-strip {
+			grid-template-columns: 1fr;
+			gap: 12px;
+			padding: 10px 12px;
+		}
+	}
+
 	.tb-select {
 		background: var(--bg-1);
 		border: 1px solid var(--line-0);

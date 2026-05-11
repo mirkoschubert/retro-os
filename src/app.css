@@ -771,7 +771,7 @@ html[data-era="workbench"] .palette { border-radius: 0; border-color: var(--acce
   .desktop.mobile .window:not(.is-focused) { display: none; }
   .desktop.mobile .resize-handle { display: none; }
   .desktop.mobile .titlebar { cursor: default; }
-  .dock { width: 100%; left: 0; transform: none; bottom: 0; border-radius: 0; border-left: 0; border-right: 0; border-bottom: 0; }
+  .dock { width: 100%; left: 0; transform: none; bottom: 0; border-radius: 0; border-left: 0; border-right: 0; border-bottom: 0; justify-content: center; }
   .module-sidebar { width: 140px; }
   .mobile-only { display: initial; }
   .desktop-only { display: none !important; }
