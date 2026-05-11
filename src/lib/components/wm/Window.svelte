@@ -24,17 +24,39 @@
 	let drag: { ox: number; oy: number } | null = $state(null);
 	let resz: { ox: number; oy: number; w: number; h: number } | null = $state(null);
 
+	function startDrag(clientX: number, clientY: number) {
+		wmStore.focus(win.id);
+		drag = { ox: clientX - win.x, oy: clientY - win.y };
+	}
+
+	function startResize(clientX: number, clientY: number) {
+		wmStore.focus(win.id);
+		resz = { ox: clientX, oy: clientY, w: win.w, h: win.h };
+	}
+
 	function onTitleDown(e: MouseEvent) {
 		if ((e.target as HTMLElement).closest('.win-btn')) return;
-		wmStore.focus(win.id);
-		drag = { ox: e.clientX - win.x, oy: e.clientY - win.y };
+		startDrag(e.clientX, e.clientY);
+	}
+
+	function onTitleTouchStart(e: TouchEvent) {
+		if ((e.target as HTMLElement).closest('.win-btn')) return;
+		e.preventDefault();
+		const t = e.touches[0];
+		startDrag(t.clientX, t.clientY);
 	}
 
 	function onResizeDown(e: MouseEvent) {
 		e.stopPropagation();
 		e.preventDefault();
-		wmStore.focus(win.id);
-		resz = { ox: e.clientX, oy: e.clientY, w: win.w, h: win.h };
+		startResize(e.clientX, e.clientY);
+	}
+
+	function onResizeTouchStart(e: TouchEvent) {
+		e.stopPropagation();
+		e.preventDefault();
+		const t = e.touches[0];
+		startResize(t.clientX, t.clientY);
 	}
 
 	$effect(() => {
@@ -43,27 +65,39 @@
 		if (resz) document.documentElement.classList.add('cursor-resizing');
 		if (drag) document.documentElement.classList.add('cursor-dragging');
 
-		function onMove(e: MouseEvent) {
+		function onMove(clientX: number, clientY: number) {
 			if (drag) {
-				wmStore.move(win.id, e.clientX - drag.ox, Math.max(0, e.clientY - drag.oy));
+				wmStore.move(win.id, clientX - drag.ox, Math.max(0, clientY - drag.oy));
 			} else if (resz) {
-				const w = Math.max(win.minW, resz.w + (e.clientX - resz.ox));
-				const h = Math.max(win.minH, resz.h + (e.clientY - resz.oy));
+				const w = Math.max(win.minW, resz.w + (clientX - resz.ox));
+				const h = Math.max(win.minH, resz.h + (clientY - resz.oy));
 				wmStore.resize(win.id, w, h);
 			}
 		}
-		function onUp() {
+
+		function onMouseMove(e: MouseEvent) { onMove(e.clientX, e.clientY); }
+		function onTouchMove(e: TouchEvent) {
+			e.preventDefault();
+			const t = e.touches[0];
+			onMove(t.clientX, t.clientY);
+		}
+
+		function onEnd() {
 			drag = null;
 			resz = null;
 			document.documentElement.classList.remove('cursor-resizing', 'cursor-dragging');
 			wmStore.saveLayout();
 		}
 
-		window.addEventListener('mousemove', onMove);
-		window.addEventListener('mouseup', onUp);
+		window.addEventListener('mousemove', onMouseMove);
+		window.addEventListener('mouseup', onEnd);
+		window.addEventListener('touchmove', onTouchMove, { passive: false });
+		window.addEventListener('touchend', onEnd);
 		return () => {
-			window.removeEventListener('mousemove', onMove);
-			window.removeEventListener('mouseup', onUp);
+			window.removeEventListener('mousemove', onMouseMove);
+			window.removeEventListener('mouseup', onEnd);
+			window.removeEventListener('touchmove', onTouchMove);
+			window.removeEventListener('touchend', onEnd);
 			document.documentElement.classList.remove('cursor-resizing', 'cursor-dragging');
 		};
 	});
@@ -75,27 +109,28 @@
 	$effect(() => { requestAnimationFrame(() => { opening = false; }); });
 </script>
 
-{#if !win.minimized || win.closing || win.restoring}
-	<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-	<div
-		class="window"
-		class:is-focused={isFocused}
-		class:win-opening={opening}
-		class:win-closing={win.closing}
-		class:win-restoring={win.restoring}
-		class:is-dragging={!!drag}
-		class:is-resizing={!!resz}
-		style="transform:translate({win.x}px,{win.y}px);width:{win.w}px;height:{win.h}px;z-index:{win.z}"
-		onmousedown={() => wmStore.focus(win.id)}
-		onfocus={() => wmStore.focus(win.id)}
-		role="region"
-		aria-label={displayTitle}
-		tabindex="-1"
-	>
+<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+<div
+	class="window"
+	class:is-focused={isFocused}
+	class:win-opening={opening}
+	class:win-closing={win.closing}
+	class:win-restoring={win.restoring}
+	class:win-minimized={win.minimized && !win.closing && !win.restoring}
+	class:is-dragging={!!drag}
+	class:is-resizing={!!resz}
+	style="transform:translate({win.x}px,{win.y}px);width:{win.w}px;height:{win.h}px;z-index:{win.z}"
+	onmousedown={() => wmStore.focus(win.id)}
+	onfocus={() => wmStore.focus(win.id)}
+	role="region"
+	aria-label={displayTitle}
+	tabindex="-1"
+>
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
 		<div
 			class="titlebar"
 			onmousedown={onTitleDown}
+			ontouchstart={onTitleTouchStart}
 			ondblclick={() => wmStore.toggleZoom(win.id, viewport)}
 			role="banner"
 		>
@@ -128,6 +163,12 @@
 			<Comp {...win.props} winId={win.id} />
 		</div>
 		<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-		<div class="resize-handle" onmousedown={onResizeDown} role="separator" aria-label="Resize window" tabindex="-1"></div>
+		<div
+			class="resize-handle"
+			onmousedown={onResizeDown}
+			ontouchstart={onResizeTouchStart}
+			role="separator"
+			aria-label="Resize window"
+			tabindex="-1"
+		></div>
 	</div>
-{/if}

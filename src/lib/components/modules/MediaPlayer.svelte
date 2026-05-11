@@ -8,7 +8,7 @@
 	import type { Album, TrackItem } from '$lib/sanity/types.js';
 	import {
 		Play, Pause, SkipBack, SkipForward, Shuffle, Repeat, Repeat1,
-		LayoutGrid, LayoutList, Volume2, ArrowLeft, Music2
+		LayoutGrid, LayoutList, Volume2, VolumeX, ArrowLeft, Music2
 	} from '@lucide/svelte';
 
 	interface FlatTrack extends TrackItem {
@@ -66,7 +66,85 @@
 	let currentTime = $state(0);
 	let duration = $state(0);
 	let vol = $state(0.62);
+	let volOpen = $state(false);
+	let volEl = $state<HTMLElement | null>(null);
+	let volPointerActive = $state(false);
+	let volChanged = $state(false);
+	let volIgnoreClickUntil = 0;
+	let volCloseTimer: ReturnType<typeof setTimeout> | null = null;
 	let audioEl = $state<HTMLAudioElement | null>(null);
+
+	function isCoarsePointer() {
+		return typeof window !== 'undefined' &&
+			window.matchMedia('(hover: none), (pointer: coarse)').matches;
+	}
+
+	function volClearTimer() {
+		if (volCloseTimer) { clearTimeout(volCloseTimer); volCloseTimer = null; }
+	}
+
+	function openVolume() { volClearTimer(); volOpen = true; }
+
+	function closeVolume() {
+		volClearTimer();
+		volOpen = false;
+		volPointerActive = false;
+		volChanged = false;
+	}
+
+	function volScheduleClose(delay = 180) {
+		volClearTimer();
+		volCloseTimer = setTimeout(() => { if (!volPointerActive) closeVolume(); }, delay);
+	}
+
+	function onVolWrapperPointerLeave() {
+		if (!isCoarsePointer() && !volPointerActive) closeVolume();
+	}
+
+	function onVolButtonClick(e: MouseEvent) {
+		if (!isCoarsePointer()) return;
+		if (Date.now() < volIgnoreClickUntil) { e.preventDefault(); e.stopPropagation(); return; }
+		if (volOpen) closeVolume(); else openVolume();
+	}
+
+	function finishVolumeGesture() {
+		volPointerActive = false;
+		volIgnoreClickUntil = Date.now() + 350;
+		if (isCoarsePointer()) volScheduleClose(volChanged ? 120 : 180);
+	}
+
+	function onVolPointerDown(e: PointerEvent) {
+		volPointerActive = true;
+		volChanged = false;
+		openVolume();
+		try { (e.currentTarget as HTMLInputElement).setPointerCapture(e.pointerId); } catch { /* not supported on all browsers */ }
+	}
+
+	function onVolInput() { volChanged = true; }
+
+	function onVolPointerUp(e: PointerEvent) {
+		const el = e.currentTarget as HTMLInputElement;
+		try { if (el.hasPointerCapture(e.pointerId)) el.releasePointerCapture(e.pointerId); } catch { /* not supported on all browsers */ }
+		finishVolumeGesture();
+	}
+
+	function onVolLostCapture() { finishVolumeGesture(); }
+	function onVolPointerCancel() { finishVolumeGesture(); }
+
+	$effect(() => {
+		if (!volOpen) return;
+		const finish = () => finishVolumeGesture();
+		window.addEventListener('pointerup', finish, { passive: true });
+		window.addEventListener('mouseup', finish, { passive: true });
+		window.addEventListener('touchend', finish, { passive: true });
+		window.addEventListener('touchcancel', finish, { passive: true });
+		return () => {
+			window.removeEventListener('pointerup', finish);
+			window.removeEventListener('mouseup', finish);
+			window.removeEventListener('touchend', finish);
+			window.removeEventListener('touchcancel', finish);
+		};
+	});
 
 	const trackDurations = new SvelteMap<string, number>();
 	let durationsVersion = $state(0);
@@ -210,6 +288,17 @@
 		playingKey = key;
 		progress = 0; currentTime = 0; duration = 0;
 		audioEl.volume = vol;
+
+		const win = winId ? wmStore.windows.find((w) => w.id === winId) : null;
+		if (win?.minimized) {
+			window.dispatchEvent(new CustomEvent('retro-os:notify', {
+				detail: {
+					title: track.title,
+					body: `${track.artist ?? track.albumArtist} · ${track.albumTitle}`,
+					coverUrl: track.albumCover ? albumCoverUrl(track.albumCover, 64) : undefined
+				}
+			}));
+		}
 
 		if (!trackDurations.has(key) && track.audioFile?.asset?._ref) {
 			const a = new Audio();
@@ -596,10 +685,10 @@
 
 		<!-- Track info + progress -->
 		<div class="transport-info">
-			<div style="color:var(--text-0);font-weight:500;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+			<div class="transport-title">
 				{currentTrack ? currentTrack.title : (lang === 'de' ? '- Kein Stück gewählt' : '- No track selected')}
 			</div>
-			<div class="mono dim" style="font-size:10.5px;letter-spacing:0.06em;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+			<div class="transport-meta mono dim">
 				{currentTrack
 					? `${currentTrack.artist ?? currentTrack.albumArtist} · ${currentTrack.albumTitle} · ${currentTrack.albumYear ?? ''}`
 					: (lang === 'de' ? 'Kein Album ausgewählt' : 'No album selected')}
@@ -621,7 +710,7 @@
 			>
 				<div class="progress-fill" style="width:{progress * 100}%"></div>
 			</div>
-			<div class="mono dim" style="display:flex;justify-content:space-between;font-size:10px;margin-top:3px">
+			<div class="transport-time mono dim">
 				<span>{formatTime(currentTime)}</span>
 				<span>{formatTime(duration)}</span>
 			</div>
@@ -661,10 +750,35 @@
 			>{#if repeatMode === 'one'}<Repeat1 size={15} />{:else}<Repeat size={15} />{/if}</button>
 		</div>
 
-		<!-- Volume -->
-		<div class="transport-vol">
-			<span class="mono dim" style="font-size:10px">VOL</span>
-			<input type="range" min="0" max="1" step="0.01" bind:value={vol} class="vol-slider" />
+		<!-- Volume popover -->
+		<div
+			class="transport-vol"
+			class:vol-open={volOpen}
+			role="group"
+			bind:this={volEl}
+			onpointerleave={onVolWrapperPointerLeave}
+		>
+			<button
+				class="ctrl-btn ctrl-vol-btn"
+				title="Volume"
+				onclick={onVolButtonClick}
+				aria-label="Volume"
+				aria-expanded={volOpen}
+			>{#if vol === 0}<VolumeX size={14} />{:else}<Volume2 size={14} />{/if}</button>
+			<div class="vol-popover" role="dialog" aria-label="Volume control">
+				<input
+					type="range"
+					min="0" max="1" step="0.01"
+					bind:value={vol}
+					class="vol-slider"
+					aria-label="Volume"
+					onpointerdown={onVolPointerDown}
+					onpointerup={onVolPointerUp}
+					onpointercancel={onVolPointerCancel}
+					onlostpointercapture={onVolLostCapture}
+					oninput={onVolInput}
+				/>
+			</div>
 		</div>
 	</div>
 
@@ -710,7 +824,7 @@
 	}
 	.album-stream-link:hover { text-decoration: underline; }
 
-	/* Transport */
+	/* Transport — single row: Cover | Info+Progress | Controls | Vol */
 	.transport {
 		height: 80px;
 		flex-shrink: 0;
@@ -740,6 +854,28 @@
 	.transport-info {
 		min-width: 0;
 		flex: 1;
+	}
+	.transport-title {
+		color: var(--text-0);
+		font-weight: 500;
+		font-size: 13px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.transport-meta {
+		font-size: 10.5px;
+		letter-spacing: 0.06em;
+		margin-top: 2px;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.transport-time {
+		display: flex;
+		justify-content: space-between;
+		font-size: 10px;
+		margin-top: 3px;
 	}
 	.progress-bar {
 		margin-top: 8px;
@@ -806,17 +942,77 @@
 	}
 	.ctrl-play:hover { background: var(--accent); border-color: var(--accent); color: var(--bg-0); }
 
-	/* Volume */
+	/* Volume popover */
 	.transport-vol {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		width: 110px;
+		position: relative;
 		flex-shrink: 0;
 	}
+	.ctrl-vol-btn {
+		width: 32px;
+		height: 32px;
+		color: var(--text-3);
+		position: relative;
+		z-index: 2;
+	}
+	.vol-popover {
+		z-index: 2;
+		position: absolute;
+		/* Kein Gap: Popover sitzt direkt auf dem Button, padding gibt visuellen Abstand */
+		bottom: 100%;
+		left: 50%;
+		transform: translateX(-50%);
+		background: var(--bg-2);
+		border: 1px solid var(--line-1);
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+		padding: 10px 8px 6px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity 0.12s ease;
+	}
+	/* Touch: Button-Toggle öffnet */
+	.transport-vol.vol-open .vol-popover {
+		opacity: 1;
+		pointer-events: all;
+	}
 	.vol-slider {
-		flex: 1;
-		min-width: 0;
+		writing-mode: vertical-lr;
+		direction: rtl;
+		height: 80px;
+		width: 20px;
 		accent-color: var(--accent);
+		cursor: pointer;
+		touch-action: none;
+	}
+
+	/* Desktop only: hover opens the popover (fine pointer = mouse, not touch) */
+	@media (hover: hover) and (pointer: fine) {
+		.transport-vol:hover .vol-popover {
+			opacity: 1;
+			pointer-events: all;
+		}
+	}
+
+	@media (max-width: 640px) {
+		.transport {
+			height: auto;
+			flex-wrap: wrap;
+			padding: 10px 12px 8px;
+			gap: 8px;
+		}
+		.transport-cover-btn,
+		.ph-image.transport-cover {
+			align-self: flex-start;
+		}
+		.transport-controls {
+			order: 3;
+			flex: 1;
+			justify-content: center;
+		}
+		.transport-vol {
+			order: 4;
+		}
 	}
 </style>

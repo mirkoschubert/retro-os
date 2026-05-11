@@ -316,6 +316,9 @@ html[data-era="workbench"] .window.is-focused { border-color: var(--accent); box
 .win-restoring {
   animation: win-restore 0.18s cubic-bezier(0.2, 0, 0.3, 1) both;
 }
+.win-minimized {
+  display: none;
+}
 .window {
   transition: width 0.18s cubic-bezier(0.2, 0, 0.3, 1),
               height 0.18s cubic-bezier(0.2, 0, 0.3, 1),
@@ -610,6 +613,9 @@ html[data-era="workbench"] .toolbar input { border-radius: 0; }
   display: block;
   z-index: 1;
 }
+.project-cover .cover-img {
+  object-position: top right;
+}
 .cover-image .cover-dim {
   position: absolute; inset: 0;
   background: rgba(0, 0, 0, 0.45);
@@ -740,27 +746,14 @@ html[data-era="workbench"] .palette { border-radius: 0; border-color: var(--acce
 /* ---------- responsive ---------- */
 .mobile-only { display: none; }
 
-@media (max-width: 1024px) and (min-width: 641px) {
-  /* Tablet - docked layout */
-  .desktop.tablet .window {
-    position: relative !important;
-    width: 100% !important;
-    height: auto !important;
-    transform: none !important;
-    top: auto !important; left: auto !important;
-    margin-bottom: 12px;
-  }
-  .desktop.tablet .window { box-shadow: var(--shadow); }
-  .desktop.tablet { padding: 12px 12px 80px; overflow-y: auto; display: block; }
-  .desktop.tablet .resize-handle { display: none; }
-  .desktop.tablet .titlebar { cursor: default; }
-}
+/* Tablet (both orientations): full desktop window behaviour */
+/* Initial positions are calculated in openModule() based on viewport size */
 
 /* TODO: Mobile layout needs a proper overhaul - currently a basic port of the prototype */
 @media (max-width: 640px) {
   /* Mobile - single fullscreen module */
   .menu-status { display: none; }
-  .menubar-logo span { display: none; }
+  .menubar-logo { padding: 0 8px; }
   .desktop.mobile { padding: 0; }
   .desktop.mobile .window {
     position: fixed !important;
