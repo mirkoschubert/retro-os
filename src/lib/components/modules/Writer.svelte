@@ -6,6 +6,7 @@
 	import { calcReadingTime, pickLocale } from '$lib/sanity/utils.js';
 	import type { Writing } from '$lib/sanity/types.js';
 	import { ChevronLeft, ChevronRight, ArrowLeft, LayoutList, Columns2, Search } from '@lucide/svelte';
+	import { focusOnMount } from '$lib/actions.js';
 	import TbSelect from '$lib/components/ui/TbSelect.svelte';
 
 	interface Props {
@@ -168,7 +169,7 @@
 							type="search"
 							placeholder="{searchPlaceholder}…"
 							bind:value={search}
-							autofocus
+							use:focusOnMount
 							oninput={() => { selectedId = null; reading = false; }}
 							onkeydown={(e) => { if (e.key === 'Escape') { searchOpen = false; search = ''; } }}
 						/>

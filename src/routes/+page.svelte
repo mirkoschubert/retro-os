@@ -18,6 +18,7 @@
 	import About from '$lib/components/modules/About.svelte';
 	import Publications from '$lib/components/modules/Publications.svelte';
 	import Legal from '$lib/components/modules/Legal.svelte';
+	import Shortcuts from '$lib/components/modules/Shortcuts.svelte';
 	import NotificationCenter from '$lib/components/shell/NotificationCenter.svelte';
 	import type { Component } from 'svelte';
 	import type { PageData } from './$types';
@@ -214,6 +215,15 @@
 				x: Math.max(60, systemStore.viewportW / 2 - 210),
 				y: Math.max(50, viewportH / 2 - 200),
 				w: 420, h: 340, minW: 320, minH: 260
+			},
+			{
+				id: 'shortcuts',
+				title: 'Shortcuts',
+				titleKey: 'shortcuts_title',
+				component: Shortcuts as unknown as Component<Record<string, unknown>>,
+				x: Math.max(60, systemStore.viewportW / 2 - 180),
+				y: Math.max(50, viewportH / 2 - 240),
+				w: 460, h: 520, minW: 340, minH: 300
 			}
 		];
 	}

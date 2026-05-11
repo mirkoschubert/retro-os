@@ -5,6 +5,7 @@
 	import { systemStore } from '$lib/stores/system.svelte.js';
 	import type { SysInfo } from '$lib/sanity/types.js';
 	import { ArrowRight } from '@lucide/svelte';
+	import KbdKey from '$lib/components/ui/KbdKey.svelte';
 
 	interface Props {
 		onOpenModule: (key: string) => void;
@@ -68,7 +69,7 @@
 			>
 				<span style="display:inline-flex;align-items:center;gap:2px;flex-shrink:0">
 					{#each sc.kbd.split('') as ch}
-						<kbd class="shortcut-mod">{ch}</kbd>
+						<KbdKey token={ch === '⌘' ? 'cmd' : ch === '⇧' ? 'shift' : ch === '⌃' ? 'ctrl' : ch === '⌥' ? 'alt' : ch} />
 					{/each}
 				</span>
 				<span style="flex:1;font-size:13px">{t[sc.labelKey]()}</span>

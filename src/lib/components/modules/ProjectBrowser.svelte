@@ -6,6 +6,7 @@
 	import { urlFor } from '$lib/sanity/image.js';
 	import type { Project } from '$lib/sanity/types.js';
 	import { Columns2, LayoutGrid, Search, ArrowLeft } from '@lucide/svelte';
+	import { focusOnMount } from '$lib/actions.js';
 
 	interface Props {
 		winId?: string;
@@ -93,7 +94,7 @@
 						type="search"
 						placeholder="{msg.search()}…"
 						bind:value={search}
-						autofocus
+						use:focusOnMount
 						onkeydown={(e) => { if (e.key === 'Escape') { searchOpen = false; search = ''; } }}
 					/>
 					<button class="tb-btn" onclick={() => { searchOpen = false; search = ''; }}>✕</button>

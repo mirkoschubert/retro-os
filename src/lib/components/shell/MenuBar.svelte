@@ -2,6 +2,7 @@
 	import { getMessages } from '$lib/i18n.js';
 	import type { Era, Lang } from '$lib/stores/system.svelte.js';
 	import { Check } from '@lucide/svelte';
+	import KbdKey from '$lib/components/ui/KbdKey.svelte';
 
 	interface ViewOption {
 		row: string;
@@ -127,6 +128,7 @@
 			label: t.help(),
 			dropdown: [
 				{ row: t.menu_welcome(), shortcut: '⌘0', on: () => { openKey = null; onOpenModule('welcome'); } },
+				{ row: t.menu_shortcuts(), on: () => { openKey = null; onOpenModule('shortcuts'); } },
 				{ divider: true },
 				{ row: t.cmd_palette(), shortcut: '⌘K', on: () => { openKey = null; onOpenPalette(); } },
 				{ row: t.console(), shortcut: '⌘.', on: () => { openKey = null; onOpenConsole(); } },
@@ -187,7 +189,7 @@
 								<span class="menu-check">{#if d.checked}<Check size={11} strokeWidth={2.5} />{/if}</span>
 								<span class="menu-label">{d.row}</span>
 								{#if d.shortcut}
-									<span class="shortcut">{#each d.shortcut.split('') as ch}{#if ch === '⌘' || ch === '⇧' || ch === '⌃' || ch === '⌥'}<kbd class="shortcut-mod">{ch}</kbd>{:else}<kbd class="shortcut-key">{ch}</kbd>{/if}{/each}</span>
+									<span class="shortcut">{#each d.shortcut.split('') as ch}<KbdKey token={ch === '⌘' ? 'cmd' : ch === '⇧' ? 'shift' : ch === '⌃' ? 'ctrl' : ch === '⌥' ? 'alt' : ch} />{/each}</span>
 								{/if}
 							</div>
 						{/if}

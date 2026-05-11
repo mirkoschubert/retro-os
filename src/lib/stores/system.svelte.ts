@@ -43,6 +43,15 @@ function detectInitialOrientation(): boolean {
 	return window.matchMedia('(orientation: portrait)').matches;
 }
 
+function detectIsMac(): boolean {
+	if (typeof navigator === 'undefined') return true;
+	const platform =
+		(navigator as Navigator & { userAgentData?: { platform?: string } }).userAgentData?.platform ??
+		navigator.platform ??
+		'';
+	return /mac/i.test(platform);
+}
+
 function createSystemStore() {
 	let lang = $state<Lang>(detectInitialLang());
 	let era = $state<Era>(detectInitialEra());
@@ -50,6 +59,7 @@ function createSystemStore() {
 	let bootDone = $state(detectBootDone());
 	let viewportW = $state(typeof window !== 'undefined' ? window.innerWidth : 1280);
 	let isPortrait = $state(detectInitialOrientation());
+	const isMac = detectIsMac();
 
 	return {
 		get lang() { return lang; },
@@ -57,6 +67,7 @@ function createSystemStore() {
 		get paletteOpen() { return paletteOpen; },
 		get bootDone() { return bootDone; },
 		get viewportW() { return viewportW; },
+		get isMac() { return isMac; },
 		get deviceClass(): 'mobile' | 'tablet-portrait' | 'tablet-landscape' | 'desktop' {
 			if (viewportW <= 640) return 'mobile';
 			if (viewportW <= 1024) return isPortrait ? 'tablet-portrait' : 'tablet-landscape';
