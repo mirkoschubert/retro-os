@@ -79,7 +79,8 @@ function cascadePosition(
 	focused: { x: number; y: number } | null,
 	viewport: { w: number; h: number } | undefined,
 	winW: number,
-	winH: number
+	winH: number,
+	isTabletPortrait?: boolean
 ): { x: number; y: number } {
 	const step = 22;
 	const marginRight = 80;
@@ -87,13 +88,15 @@ function cascadePosition(
 	const maxX = viewport ? viewport.w - winW - marginRight : 600;
 	const maxY = viewport ? viewport.h - winH - marginBottom : 400;
 
-	if (!focused) return { x: 60, y: 40 };
+	if (!focused) return { x: isTabletPortrait ? 8 : 40, y: isTabletPortrait ? 8 : 40 };
 
-	let x = focused.x + step;
+	let x = isTabletPortrait ? focused.x : focused.x + step;
 	let y = focused.y + step;
 
 	// Wrap: if too far right or down, reset near top-left
-	if (x > maxX || y > maxY) { x = 40; y = 40; }
+	const wrapX = !isTabletPortrait && x > maxX;
+	const wrapY = y > maxY;
+	if (wrapX || wrapY) { x = isTabletPortrait ? 8 : 40; y = isTabletPortrait ? 8 : 40; }
 
 	return { x, y };
 }
@@ -113,7 +116,7 @@ function createWMStore() {
 		get windows() { return windows; },
 		get focusedId() { return focusedId; },
 
-		open(spec: WindowSpec, viewport?: { w: number; h: number }) {
+		open(spec: WindowSpec, viewport?: { w: number; h: number; tabletPortraitW?: number }) {
 			// Already open: bring to front
 			const existing = windows.find((w) => w.id === spec.id);
 			if (existing) {
@@ -130,33 +133,29 @@ function createWMStore() {
 
 			const persisted = load()[spec.id];
 
-			// Geometry: persisted > spec default > cascade
-			const useDefault = !persisted;
+			// Geometry: persisted > cascade
 			let initX: number;
 			let initY: number;
+			let initW: number;
+			const initH = persisted?.h ?? spec.h ?? 460;
+
+			const isTabletPortrait = !persisted && viewport?.tabletPortraitW !== undefined;
 
 			if (persisted) {
 				initX = persisted.x;
 				initY = persisted.y;
-			} else if (spec.x !== undefined && spec.y !== undefined && windows.length === 0) {
-				// First window ever: use the spec position directly (Welcome centered)
-				initX = spec.x;
-				initY = spec.y;
+				initW = persisted.w;
 			} else {
-				// Cascade off the currently focused window
-				const focused = windows.find((w) => w.id === focusedId);
-				const pos = cascadePosition(
-					focused ? { x: focused.x, y: focused.y } : null,
-					viewport,
-					spec.w ?? 720,
-					spec.h ?? 460
-				);
+				const pad = 8;
+				initW = isTabletPortrait ? (viewport!.tabletPortraitW! - pad * 2) : (spec.w ?? 720);
+
+				const base = windows.length > 0
+					? [...windows].filter((w) => !w.minimized).sort((a, b) => b.z - a.z)[0] ?? null
+					: null;
+				const pos = cascadePosition(base, viewport, initW, initH, isTabletPortrait);
 				initX = pos.x;
 				initY = pos.y;
 			}
-
-			const initW = persisted?.w ?? spec.w ?? 720;
-			const initH = persisted?.h ?? spec.h ?? 460;
 
 			const maxZ = windows.length > 0 ? Math.max(zSeq, ...windows.map((w) => w.z)) : zSeq;
 			zSeq = maxZ + 1;
@@ -184,8 +183,7 @@ function createWMStore() {
 			if (!spec.startMinimized) focusedId = spec.id;
 
 			// Persist immediately so position is remembered if user closes without moving
-			if (useDefault) save(windows);
-			else save(windows);
+			save(windows);
 		},
 
 		close(id: string) {
@@ -273,11 +271,11 @@ function createWMStore() {
 		},
 
 		move(id: string, x: number, y: number) {
-			windows = windows.map((w) => w.id === id ? { ...w, x, y } : w);
+			windows = windows.map((w) => w.id === id ? { ...w, x: Math.round(x), y: Math.round(y) } : w);
 		},
 
 		resize(id: string, w: number, h: number) {
-			windows = windows.map((win) => win.id === id ? { ...win, w, h } : win);
+			windows = windows.map((win) => win.id === id ? { ...win, w: Math.round(w), h: Math.round(h) } : win);
 		},
 
 		saveLayout() {

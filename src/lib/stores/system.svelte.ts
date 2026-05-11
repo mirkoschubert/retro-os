@@ -38,17 +38,33 @@ function detectBootDone(): boolean {
 	}
 }
 
+function detectInitialOrientation(): boolean {
+	if (typeof window === 'undefined') return false;
+	return window.matchMedia('(orientation: portrait)').matches;
+}
+
 function createSystemStore() {
 	let lang = $state<Lang>(detectInitialLang());
 	let era = $state<Era>(detectInitialEra());
 	let paletteOpen = $state(false);
 	let bootDone = $state(detectBootDone());
+	let viewportW = $state(typeof window !== 'undefined' ? window.innerWidth : 1280);
+	let isPortrait = $state(detectInitialOrientation());
 
 	return {
 		get lang() { return lang; },
 		get era() { return era; },
 		get paletteOpen() { return paletteOpen; },
 		get bootDone() { return bootDone; },
+		get viewportW() { return viewportW; },
+		get deviceClass(): 'mobile' | 'tablet-portrait' | 'tablet-landscape' | 'desktop' {
+			if (viewportW <= 640) return 'mobile';
+			if (viewportW <= 1024) return isPortrait ? 'tablet-portrait' : 'tablet-landscape';
+			return 'desktop';
+		},
+
+		setViewportW(w: number) { viewportW = w; },
+		setPortrait(p: boolean) { isPortrait = p; },
 
 		setLang(value: Lang) {
 			lang = value;
