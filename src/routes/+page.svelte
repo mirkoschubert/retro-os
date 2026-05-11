@@ -103,6 +103,19 @@
 				}
 			];
 		}
+		if (focused?.id === 'publications') {
+			const pubView = (focused.props.pubView as 'list' | 'columns' | undefined) ?? 'columns';
+			return [
+				{
+					row: pageT.view_list(), shortcut: '⌘⇧1', disabled: false, checked: pubView === 'list',
+					on: () => wmStore.updateProps('publications', { pubView: 'list' })
+				},
+				{
+					row: pageT.view_columns(), shortcut: '⌘⇧2', disabled: isMobile, checked: pubView === 'columns',
+					on: isMobile ? undefined : () => wmStore.updateProps('publications', { pubView: 'columns' })
+				}
+			];
+		}
 		if (focused?.id === 'media') {
 			const currentView = (focused.props.view as string | undefined) ?? 'albums';
 			if (currentView === 'albums') {

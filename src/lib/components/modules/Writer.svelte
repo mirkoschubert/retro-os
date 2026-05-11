@@ -297,6 +297,7 @@
 	.writer-list {
 		flex: 1;
 		overflow-y: auto;
+		background: var(--bg-2);
 	}
 	.writer-list.is-sidebar {
 		flex: 0 0 260px;
@@ -349,7 +350,7 @@
 
 	.writer-list-excerpt {
 		font-size: 11.5px;
-		color: var(--text-3);
+		color: var(--text-1);
 		line-height: 1.55;
 		display: -webkit-box;
 		-webkit-line-clamp: 2;

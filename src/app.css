@@ -763,9 +763,7 @@ html[data-era="workbench"] .palette { border-radius: 0; border-color: var(--acce
   .menubar-logo { padding: 0 8px; }
   .mobile-hidden { display: none; }
   .menu-spacer { display: none; }
-  .menu-status { margin-left: auto; flex-shrink: 0; }
-  .menubar { overflow: hidden; }
-  .menu-status { padding-right: 0; }
+  .menu-status { margin-left: auto; flex-shrink: 0; padding-right: 0; }
   .menu-status .pill { border-right: none; }
   .desktop.mobile { padding: 0; }
   .desktop.mobile .window {
