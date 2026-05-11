@@ -18,17 +18,13 @@
 	import About from '$lib/components/modules/About.svelte';
 	import Publications from '$lib/components/modules/Publications.svelte';
 	import Legal from '$lib/components/modules/Legal.svelte';
+	import NotificationCenter from '$lib/components/shell/NotificationCenter.svelte';
 	import type { Component } from 'svelte';
 	import type { PageData } from './$types';
 
 	const { data }: { data: PageData } = $props();
 
-	let viewportW = $state(1280);
 	let viewportH = $state(800);
-
-	const deviceClass = $derived(
-		viewportW <= 640 ? 'mobile' : viewportW <= 1024 ? 'tablet' : 'desktop'
-	);
 
 	let now = $state(new Date());
 
@@ -75,6 +71,19 @@
 	// Context-sensitive view options depending on the focused window + its internal state
 	const viewOptions = $derived((): ViewOption[] => {
 		const focused = wmStore.windows.find((w) => w.id === wmStore.focusedId);
+		if (focused?.id === 'projects') {
+			const projectView = (focused.props.projectView as 'grid' | 'list' | undefined) ?? 'list';
+			return [
+				{
+					row: pageT.view_grid(), shortcut: '⌘⇧1', disabled: false, checked: projectView === 'grid',
+					on: () => wmStore.updateProps('projects', { projectView: 'grid' })
+				},
+				{
+					row: pageT.view_list(), shortcut: '⌘⇧2', disabled: false, checked: projectView === 'list',
+					on: () => wmStore.updateProps('projects', { projectView: 'list' })
+				}
+			];
+		}
 		if (focused?.id === 'media') {
 			const currentView = (focused.props.view as string | undefined) ?? 'albums';
 			if (currentView === 'albums') {
@@ -126,7 +135,7 @@
 				title: 'Darkroom',
 				titleKey: 'mod_darkroom',
 				component: Darkroom as unknown as Component<Record<string, unknown>>,
-				x: 100, y: 55, w: 760, h: 500, minW: 480, minH: 340
+				x: 100, y: 55, w: 940, h: 600, minW: 480, minH: 340
 			},
 			{
 				id: 'writer',
@@ -140,28 +149,28 @@
 				title: 'System Info',
 				titleKey: 'mod_sysinfo',
 				component: SysInfo as unknown as Component<Record<string, unknown>>,
-				x: 180, y: 70, w: 560, h: 480, minW: 400, minH: 320
+				x: 180, y: 70, w: 560, h: 520, minW: 400, minH: 320
 			},
 			{
 				id: 'terminal',
 				title: 'Terminal',
 				titleKey: 'mod_terminal',
 				component: Terminal as unknown as Component<Record<string, unknown>>,
-				x: 200, y: 80, w: 520, h: 380, minW: 360, minH: 240
+				x: 200, y: 80, w: 740, h: 460, minW: 360, minH: 240
 			},
 			{
 				id: 'publications',
 				title: 'Publications',
 				titleKey: 'mod_publications',
 				component: Publications as unknown as Component<Record<string, unknown>>,
-				x: 160, y: 70, w: 580, h: 440, minW: 420, minH: 300
+				x: 160, y: 70, w: 780, h: 540, minW: 420, minH: 300
 			},
 			{
 				id: 'legal',
 				title: 'Legal',
 				titleKey: 'legal_title',
 				component: Legal as unknown as Component<Record<string, unknown>>,
-				x: Math.max(60, viewportW / 2 - 250),
+				x: Math.max(60, systemStore.viewportW / 2 - 250),
 				y: Math.max(50, viewportH / 2 - 210),
 				w: 500, h: 420, minW: 380, minH: 300
 			},
@@ -170,7 +179,7 @@
 				title: 'About RetroOS',
 				titleKey: 'about_title',
 				component: About as unknown as Component<Record<string, unknown>>,
-				x: Math.max(60, viewportW / 2 - 210),
+				x: Math.max(60, systemStore.viewportW / 2 - 210),
 				y: Math.max(50, viewportH / 2 - 200),
 				w: 420, h: 340, minW: 320, minH: 260
 			}
@@ -202,27 +211,37 @@
 			...extraProps
 		};
 
-		wmStore.open({
-			id: def.id,
-			title: def.title,
-			titleKey: def.titleKey,
-			component: def.component,
-			props: sharedProps,
-			x: def.x,
-			y: def.y,
-			w: def.w,
-			h: def.h,
-			minW: def.minW,
-			minH: def.minH,
-			startMinimized
-		});
+		wmStore.open(
+			{
+				id: def.id,
+				title: def.title,
+				titleKey: def.titleKey,
+				component: def.component,
+				props: sharedProps,
+				x: def.x,
+				y: def.y,
+				w: def.w,
+				h: def.h,
+				minW: def.minW,
+				minH: def.minH,
+				startMinimized
+			},
+			{
+				w: systemStore.viewportW,
+				h: viewportH,
+				tabletPortraitW: systemStore.deviceClass === 'tablet-portrait'
+					? systemStore.viewportW
+					: undefined
+			}
+		);
 	}
 
 	function measureDesktop() {
 		const style = getComputedStyle(document.documentElement);
 		const menubarH = parseInt(style.getPropertyValue('--menubar-h')) || 26;
 		const dockH = parseInt(style.getPropertyValue('--dock-h')) || 64;
-		viewportW = window.innerWidth;
+		systemStore.setViewportW(window.innerWidth);
+		systemStore.setPortrait(window.matchMedia('(orientation: portrait)').matches);
 		viewportH = window.innerHeight - menubarH - dockH - 24;
 	}
 
@@ -233,6 +252,8 @@
 			measureDesktop();
 		}
 		window.addEventListener('resize', onResize);
+		const orientationMq = window.matchMedia('(orientation: portrait)');
+		orientationMq.addEventListener('change', measureDesktop);
 
 		const clockInterval = setInterval(() => {
 			now = new Date();
@@ -347,6 +368,7 @@
 
 		return () => {
 			window.removeEventListener('resize', onResize);
+			orientationMq.removeEventListener('change', measureDesktop);
 			window.removeEventListener('retro-os:setlang', onSetLang);
 			window.removeEventListener('retro-os:palette', onPalette);
 			window.removeEventListener('keydown', onKeyDown);
@@ -370,9 +392,9 @@
 		onOpenConsole={() => openModule('terminal')}
 	/>
 
-	<div class="desktop {deviceClass}">
+	<div class="desktop {systemStore.deviceClass}">
 		{#each wmStore.windows as win (win.id)}
-			<Window win={win} viewport={{ w: viewportW, h: viewportH }} />
+			<Window win={win} viewport={{ w: systemStore.viewportW, h: viewportH }} />
 		{/each}
 	</div>
 
@@ -394,6 +416,8 @@
 		albums={data.albums}
 		publications={data.publications}
 	/>
+
+	<NotificationCenter />
 
 	{#if !systemStore.bootDone}
 		<BootScreen onDone={() => systemStore.markBooted()} />
