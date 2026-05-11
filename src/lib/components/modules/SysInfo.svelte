@@ -292,4 +292,32 @@
 		font-size: 10.5px;
 		letter-spacing: 0.06em;
 	}
+
+	@media (max-width: 640px) {
+		.sysinfo-wrap {
+			padding: 20px 16px;
+		}
+		.sysinfo-header {
+			grid-template-columns: 1fr;
+			gap: 16px;
+		}
+		.portrait-frame {
+			width: 90px;
+			height: 112px;
+		}
+		.sysinfo-name {
+			font-size: 22px;
+		}
+		.sysinfo-meta-grid {
+			grid-template-columns: 1fr;
+			row-gap: 4px;
+		}
+		.meta-label {
+			margin-top: 8px;
+		}
+		.sysinfo-stats {
+			grid-template-columns: 1fr 1fr;
+			gap: 10px;
+		}
+	}
 </style>
