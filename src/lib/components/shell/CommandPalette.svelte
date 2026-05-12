@@ -87,15 +87,22 @@
 			kind: 'PHOT',
 			on: () => onOpenModule('darkroom', { initialId: p._id })
 		})),
-		...albums.flatMap((a) =>
-			(a.tracks ?? []).map((tr) => ({
+		...albums.flatMap((a) => [
+			{
+				id: 'al-' + a._id,
+				label: a.title,
+				sub: `${a.artist}${a.year ? ' · ' + a.year : ''}`,
+				kind: 'MUSC',
+				on: () => onOpenModule('media', { initialAlbumId: a._id })
+			},
+			...(a.tracks ?? []).map((tr) => ({
 				id: 'tr-' + a._id + '-' + tr._key,
 				label: tr.title,
 				sub: `${tr.artist ?? a.artist} · ${a.title}`,
 				kind: 'MUSC',
 				on: () => onOpenModule('media', { initialTrackKey: tr._key })
 			}))
-		),
+		]),
 		...publications.map((p) => ({
 			id: 'pub-' + p._id,
 			label: p.name,
