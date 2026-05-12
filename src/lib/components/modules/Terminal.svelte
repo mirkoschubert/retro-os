@@ -70,6 +70,17 @@
 		});
 	});
 
+	$effect(() => {
+		function onGlobalKeyDown(e: KeyboardEvent) {
+			if (e.key === 'c' && (e.ctrlKey || e.metaKey) && (animInterval !== null || matrixActive)) {
+				e.preventDefault();
+				stopAnim();
+			}
+		}
+		window.addEventListener('keydown', onGlobalKeyDown);
+		return () => window.removeEventListener('keydown', onGlobalKeyDown);
+	});
+
 	// ── Helpers ────────────────────────────────────────────────────────────────
 	function append(lines: HistoryLine[]) {
 		history = [...history, ...lines, { kind: 'sys', text: '' }];
@@ -224,40 +235,44 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	bind:this={terminalEl}
-	style="position:relative;flex:1;background:#0c0d10;color:var(--text-0);font-family:var(--font-mono);font-size:12px;padding:14px 18px;overflow:auto"
+	style="position:relative;flex:1;background:#0c0d10;overflow:hidden"
 	onclick={(e) => { if (!matrixActive) { e.stopPropagation(); inputEl?.focus(); } }}
 >
-	{#each history as line, i (i)}
-		<div
-			style="color:{line.kind === 'in'
-				? 'var(--accent)'
-				: line.kind === 'err'
-					? '#d77860'
-					: line.kind === 'sys'
-						? 'var(--text-2)'
-						: 'var(--text-1)'};white-space:pre-wrap;line-height:1.55"
-		>
-			{line.text || ' '}
-		</div>
-	{/each}
+	<div
+		bind:this={terminalEl}
+		style="position:absolute;inset:0;color:var(--text-0);font-family:var(--font-mono);font-size:12px;padding:14px 18px;overflow:auto"
+	>
+		{#each history as line, i (i)}
+			<div
+				style="color:{line.kind === 'in'
+					? 'var(--accent)'
+					: line.kind === 'err'
+						? '#d77860'
+						: line.kind === 'sys'
+							? 'var(--text-2)'
+							: 'var(--text-1)'};white-space:pre-wrap;line-height:1.55"
+			>
+				{line.text || ' '}
+			</div>
+		{/each}
 
-	{#if !matrixActive}
-		<div style="display:flex;gap:8px;margin-top:4px">
-			<span style="color:var(--accent);white-space:nowrap">{cwdLabel(cwd)}/$</span>
-			<input
-				bind:this={inputEl}
-				bind:value={input}
-				onkeydown={handleKeyDown}
-				autocomplete="off"
-				data-1p-ignore
-				data-lpignore="true"
-				data-form-type="other"
-				style="flex:1;background:transparent;border:0;outline:0;color:var(--text-0);font-family:var(--font-mono);font-size:12px"
-				aria-label="Terminal input"
-			/>
-		</div>
-	{/if}
+		{#if !matrixActive}
+			<div style="display:flex;gap:8px;margin-top:4px">
+				<span style="color:var(--accent);white-space:nowrap">{cwdLabel(cwd)}/$</span>
+				<input
+					bind:this={inputEl}
+					bind:value={input}
+					onkeydown={handleKeyDown}
+					autocomplete="off"
+					data-1p-ignore
+					data-lpignore="true"
+					data-form-type="other"
+					style="flex:1;background:transparent;border:0;outline:0;color:var(--text-0);font-family:var(--font-mono);font-size:12px"
+					aria-label="Terminal input"
+				/>
+			</div>
+		{/if}
+	</div>
 
 	{#if matrixActive}
 		<canvas
