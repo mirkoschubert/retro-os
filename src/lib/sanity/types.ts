@@ -81,6 +81,7 @@ export interface Album {
 	artist: string;
 	year?: number;
 	type?: 'single' | 'ep' | 'album';
+	slug?: SanitySlug;
 	cover?: SanityImageSource;
 	description?: LocaleText;
 	spotifyUrl?: string;

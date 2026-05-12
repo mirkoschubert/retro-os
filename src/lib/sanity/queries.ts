@@ -53,6 +53,7 @@ export const albumsQuery = groq`*[_type == "album"] | order(year desc) {
   artist,
   year,
   type,
+  slug,
   cover,
   description,
   spotifyUrl,

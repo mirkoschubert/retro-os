@@ -24,10 +24,11 @@
 		winId?: string;
 		albums?: Album[];
 		initialAlbumId?: string;
+		initialTrackKey?: string;
 		albumView?: 'grid' | 'list';
 	}
 
-	const { albums = [], initialAlbumId, winId, albumView: albumViewProp }: Props = $props();
+	const { albums = [], initialAlbumId, initialTrackKey, winId, albumView: albumViewProp }: Props = $props();
 	const lang = $derived(systemStore.lang);
 	const t = $derived(getMessages(lang));
 
@@ -57,6 +58,22 @@
 			handledAlbumId = initialAlbumId;
 			const album = albums.find((a) => a._id === initialAlbumId);
 			if (album) openAlbum(album, true);
+		}
+	});
+
+	// Handle initialTrackKey: find the album, open its single view, play the specific track
+	let handledTrackKey = $state<string | null>(null);
+	$effect(() => {
+		if (initialTrackKey && initialTrackKey !== handledTrackKey) {
+			handledTrackKey = initialTrackKey;
+			const album = albums.find((a) => a.tracks?.some((tr) => tr._key === initialTrackKey));
+			if (album) {
+				focusedAlbumId = album._id;
+				view = 'single';
+				if (winId) wmStore.updateProps(winId, { view: 'single', focusedAlbumId: album._id });
+				playbackAlbumId = album._id;
+				togglePlay(initialTrackKey);
+			}
 		}
 	});
 

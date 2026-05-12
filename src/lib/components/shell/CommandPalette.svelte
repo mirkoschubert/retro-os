@@ -93,7 +93,7 @@
 				label: tr.title,
 				sub: `${tr.artist ?? a.artist} · ${a.title}`,
 				kind: 'MUSC',
-				on: () => onOpenModule('media', { initialAlbumId: a._id })
+				on: () => onOpenModule('media', { initialTrackKey: tr._key })
 			}))
 		),
 		...publications.map((p) => ({

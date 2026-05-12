@@ -1,151 +1,222 @@
 <script lang="ts">
+	import { tick } from 'svelte';
 	import { systemStore } from '$lib/stores/system.svelte.js';
-	import { pickLocale } from '$lib/sanity/utils.js';
-	import type { Project, Writing, Photo, Album, SysInfo } from '$lib/sanity/types.js';
-
-	function pad(s: string | undefined, n: number) {
-		return (s ?? '').padEnd(n);
-	}
+	import type { Project, Writing, Photo, Album, SysInfo, Publication } from '$lib/sanity/types.js';
+	import {
+		type HistoryLine,
+		type TerminalData,
+		HACK_LINES,
+		KATAKANA,
+		cwdLabel,
+		tryAutocomplete,
+		runCommand
+	} from '$lib/terminal.js';
 
 	interface Props {
-		onOpenModule: (key: string) => void;
+		onOpenModule: (key: string, extra?: Record<string, unknown>) => void;
 		projects?: Project[];
 		writings?: Writing[];
 		photos?: Photo[];
 		albums?: Album[];
+		publications?: Publication[];
 		sysInfo?: SysInfo | null;
 		winId?: string;
 	}
 
-	const { onOpenModule, projects = [], writings = [], photos = [], albums = [], sysInfo }: Props = $props();
+	const {
+		onOpenModule,
+		projects = [],
+		writings = [],
+		photos = [],
+		albums = [],
+		publications = [],
+		sysInfo
+	}: Props = $props();
+
 	const lang = $derived(systemStore.lang);
 
-	interface HistoryLine {
-		kind: 'in' | 'out' | 'err' | 'sys';
-		text: string;
+	function data(): TerminalData {
+		return { projects, writings, photos, albums, publications, sysInfo, lang };
 	}
 
+	// ── State ──────────────────────────────────────────────────────────────────
+	let history = $state<HistoryLine[]>(initLines());
+	let cwd = $state('~');
 	let input = $state('');
+	let cmdHistory = $state<string[]>([]);
+	let histIdx = $state(-1);
+	let animInterval: ReturnType<typeof setInterval> | null = null;
+	let matrixActive = $state(false);
+
 	let terminalEl: HTMLElement;
-	let inputEl: HTMLInputElement;
+	let inputEl = $state<HTMLInputElement | undefined>(undefined);
+	let canvasEl = $state<HTMLCanvasElement | undefined>(undefined);
 
-	$effect(() => {
-		inputEl?.focus();
-	});
-
+	// ── Init (only once, not reactive) ────────────────────────────────────────
 	function initLines(): HistoryLine[] {
 		return [
-			{ kind: 'sys', text: `RetroOS ${sysInfo?.shell ?? 'msh'} - ${sysInfo?.build ?? '–'}` },
-			{
-				kind: 'sys',
-				text:
-					lang === 'de'
-						? 'Tippe `help` für Befehle, `open <programm>` zum Starten, `whoami` für Kontakt.'
-						: 'Type `help` for commands, `open <program>` to launch, `whoami` for contact.'
-			},
+			{ kind: 'sys', text: `RetroOS ${sysInfo?.shell ?? 'msh'} - ${sysInfo?.build ?? '-'}` },
+			{ kind: 'sys', text: 'Type `help` for commands, `ls` for contents, `cd <dir>` to navigate.' },
 			{ kind: 'sys', text: '' }
 		];
 	}
 
-	let history = $state<HistoryLine[]>(initLines());
+	$effect(() => { inputEl?.focus(); });
 
 	$effect(() => {
-		terminalEl?.scrollTo({ top: terminalEl.scrollHeight, behavior: 'smooth' });
+		void history.length;
+		tick().then(() => {
+			terminalEl?.scrollTo({ top: terminalEl.scrollHeight, behavior: 'smooth' });
+		});
 	});
 
-	const MODULE_MAP: Record<string, string> = {
-		projects: 'projects', project: 'projects',
-		writer: 'writer', writing: 'writer',
-		media: 'media', music: 'media',
-		darkroom: 'darkroom', photos: 'darkroom',
-		publications: 'publications', pub: 'publications',
-		sysinfo: 'sysinfo', about: 'sysinfo',
-		terminal: 'terminal'
-	};
-
-	function run(cmd: string) {
-		const parts = cmd.trim().split(/\s+/);
-		const head = (parts[0] ?? '').toLowerCase();
-		const arg = parts.slice(1).join(' ');
-		const out: HistoryLine[] = [];
-		out.push({ kind: 'in', text: `~/$ ${cmd}` });
-
-		switch (head) {
-			case '':
-				break;
-			case 'help':
-				out.push({
-					kind: 'out',
-					text:
-						lang === 'de'
-							? 'Verfügbare Befehle:\n  help                  Diese Liste\n  whoami                Kurzbiografie\n  ls [bereich]          Inhalte zeigen\n  open <programm>       Programm starten\n  lang [en|de]          Sprache wechseln\n  clear                 Löschen'
-							: 'Available commands:\n  help                  This list\n  whoami                Short bio\n  ls [section]          List contents\n  open <program>        Launch program\n  lang [en|de]          Switch language\n  clear                 Clear screen'
-				});
-				break;
-			case 'whoami': {
-				const email = sysInfo?.email ?? '–';
-				const name = sysInfo?.fullname ?? sysInfo?.user ?? '–';
-				const prof = sysInfo?.profession ? (lang === 'de' ? sysInfo.profession.de : sysInfo.profession.en) ?? '–' : '–';
-				const avail = sysInfo?.available_for ? (lang === 'de' ? sysInfo.available_for.de : sysInfo.available_for.en) ?? '–' : '–';
-				out.push({ kind: 'out', text: `${name} · ${email}\n${prof}\n${avail}` });
-				break;
-			}
-			case 'ls': {
-				const sec = (arg || '').toLowerCase();
-				if (!sec || sec === '/' || sec === '~') {
-					out.push({ kind: 'out', text: 'projects/   writing/   photos/   music/   publications/   system/' });
-				} else if (sec.startsWith('proj')) {
-					if (projects.length === 0) { out.push({ kind: 'out', text: lang === 'de' ? '(keine Projekte geladen)' : '(no projects loaded)' }); break; }
-					out.push({ kind: 'out', text: projects.map((p) => `${p.year ?? '????'}  ${pad(p.slug?.current, 24)}  ${pickLocale(lang, p.title)}`).join('\n') });
-				} else if (sec.startsWith('writ')) {
-					if (writings.length === 0) { out.push({ kind: 'out', text: lang === 'de' ? '(keine Texte geladen)' : '(no writings loaded)' }); break; }
-					out.push({ kind: 'out', text: writings.map((w) => `${w.date ?? '????-??-??'}  ${pad(w.slug?.current, 24)}  ${pickLocale(lang, w.title)}`).join('\n') });
-				} else if (sec.startsWith('phot')) {
-					if (photos.length === 0) { out.push({ kind: 'out', text: lang === 'de' ? '(keine Fotos geladen)' : '(no photos loaded)' }); break; }
-					out.push({ kind: 'out', text: photos.map((p) => `${p.date ?? '????-??-??'}  ${pad(p.camera, 20)}  ${pickLocale(lang, p.title)}`).join('\n') });
-				} else if (sec.startsWith('mus')) {
-					const tracks = albums.flatMap((a) => (a.tracks ?? []).map((tr) => ({ artist: a.artist, album: a.title, title: tr.title, year: a.year })));
-					if (tracks.length === 0) { out.push({ kind: 'out', text: lang === 'de' ? '(keine Tracks geladen)' : '(no tracks loaded)' }); break; }
-					out.push({ kind: 'out', text: tracks.map((tr) => `${tr.year ?? '????'}  ${pad(tr.artist, 20)}  ${tr.title}`).join('\n') });
-				} else if (sec.startsWith('pub')) {
-					out.push({ kind: 'out', text: lang === 'de' ? 'Benutze `open publications` um das Modul zu öffnen.' : 'Use `open publications` to browse publications.' });
-				} else {
-					out.push({ kind: 'err', text: `ls: ${sec}: ${lang === 'de' ? 'kein solcher Bereich' : 'no such section'}` });
-				}
-				break;
-			}
-			case 'open': {
-				const target = MODULE_MAP[arg.toLowerCase()];
-				if (target) {
-					onOpenModule(target);
-					out.push({ kind: 'out', text: `→ ${target}` });
-				} else {
-					out.push({ kind: 'err', text: `open: ${arg || '?'}: ${lang === 'de' ? 'unbekanntes Programm' : 'unknown program'}` });
-				}
-				break;
-			}
-			case 'lang':
-				if (arg === 'en' || arg === 'de') {
-					window.dispatchEvent(new CustomEvent('retro-os:setlang', { detail: arg }));
-					out.push({ kind: 'out', text: `lang → ${arg}` });
-				} else {
-					out.push({ kind: 'out', text: lang });
-				}
-				break;
-			case 'clear':
-				history = [];
-				return;
-			default:
-				out.push({ kind: 'err', text: `${head}: ${lang === 'de' ? 'Befehl nicht gefunden' : 'command not found'}` });
-		}
-
-		history = [...history, ...out, { kind: 'sys', text: '' }];
+	// ── Helpers ────────────────────────────────────────────────────────────────
+	function append(lines: HistoryLine[]) {
+		history = [...history, ...lines, { kind: 'sys', text: '' }];
 	}
 
+	// ── Matrix canvas ─────────────────────────────────────────────────────────
+	function startMatrixCanvas() {
+		matrixActive = true;
+		tick().then(() => {
+			if (!canvasEl) return;
+			const ctx = canvasEl.getContext('2d');
+			if (!ctx) return;
+
+			const W = canvasEl.width = canvasEl.offsetWidth;
+			const H = canvasEl.height = canvasEl.offsetHeight;
+			const fontSize = 14;
+			const cols = Math.floor(W / fontSize);
+			const drops = Array.from({ length: cols }, () => Math.random() * -H);
+
+			animInterval = setInterval(() => {
+				ctx.fillStyle = 'rgba(12, 13, 16, 0.18)';
+				ctx.fillRect(0, 0, W, H);
+
+				ctx.font = `${fontSize}px monospace`;
+				for (let i = 0; i < cols; i++) {
+					const ch = KATAKANA[Math.floor(Math.random() * KATAKANA.length)];
+					const x = i * fontSize;
+					const y = (drops[i] as number) * fontSize;
+					// leading character brighter
+					ctx.fillStyle = '#9ef';
+					ctx.fillText(ch, x, y);
+					// column trail in green
+					ctx.fillStyle = '#0f5';
+					for (let j = 1; j <= 8; j++) {
+						const prevCh = KATAKANA[Math.floor(Math.random() * KATAKANA.length)];
+						const alpha = 1 - j / 9;
+						ctx.globalAlpha = alpha;
+						ctx.fillText(prevCh, x, y - j * fontSize);
+					}
+					ctx.globalAlpha = 1;
+					(drops[i] as number)++;
+					if ((drops[i] as number) * fontSize > H && Math.random() > 0.975) {
+						drops[i] = 0;
+					}
+				}
+			}, 40);
+		});
+	}
+
+	function stopMatrix() {
+		if (animInterval !== null) { clearInterval(animInterval); animInterval = null; }
+		matrixActive = false;
+		inputEl?.focus();
+		history = [...history, { kind: 'sys', text: '' }];
+	}
+
+	// ── Hack animation ────────────────────────────────────────────────────────
+	function startHack() {
+		let lineIdx = 0;
+		const slotIdx = history.length;
+		history = [...history, { kind: 'out', text: '' }];
+		animInterval = setInterval(() => {
+			if (lineIdx >= HACK_LINES.length) {
+				if (animInterval !== null) { clearInterval(animInterval); animInterval = null; }
+				history = [...history, { kind: 'sys', text: '' }];
+				return;
+			}
+			const shown = HACK_LINES.slice(0, lineIdx + 1).join('\n');
+			history = [
+				...history.slice(0, slotIdx),
+				{ kind: 'out', text: shown },
+				...history.slice(slotIdx + 1)
+			];
+			lineIdx++;
+		}, 200);
+	}
+
+	function stopAnim() {
+		if (animInterval !== null) { clearInterval(animInterval); animInterval = null; }
+		if (matrixActive) { stopMatrix(); return; }
+		history = [...history, { kind: 'out', text: '^C' }, { kind: 'sys', text: '' }];
+	}
+
+	// ── Run ───────────────────────────────────────────────────────────────────
+	function run(cmd: string) {
+		const trimmed = cmd.trim();
+		if (!trimmed) return;
+		if (animInterval !== null || matrixActive) return;
+
+		const result = runCommand(trimmed, cwd, data(), onOpenModule);
+
+		if (result.clearAll) {
+			history = [];
+			cwd = '~';
+			cmdHistory = [];
+			histIdx = -1;
+			return;
+		}
+
+		if (result.newCwd !== undefined) cwd = result.newCwd;
+		if (result.silent) return;
+
+		if (result.startMatrix) {
+			append(result.lines);
+			startMatrixCanvas();
+			return;
+		}
+
+		if (result.startHack) {
+			append(result.lines);
+			history = [...history, { kind: 'sys', text: 'Press Ctrl+C to stop' }];
+			startHack();
+			return;
+		}
+
+		append(result.lines);
+	}
+
+	// ── Input ─────────────────────────────────────────────────────────────────
 	function handleKeyDown(e: KeyboardEvent) {
+		if (e.key === 'c' && (e.ctrlKey || e.metaKey)) {
+			if (animInterval !== null || matrixActive) {
+				e.preventDefault();
+				stopAnim();
+			}
+			return;
+		}
+		if (animInterval !== null || matrixActive) return;
+
 		if (e.key === 'Enter') {
+			const cmd = input.trim();
+			if (cmd) { cmdHistory = [cmd, ...cmdHistory.slice(0, 49)]; histIdx = -1; }
 			run(input);
 			input = '';
+		} else if (e.key === 'Tab') {
+			e.preventDefault();
+			const completed = tryAutocomplete(input, cwd, data());
+			if (completed) input = completed;
+		} else if (e.key === 'ArrowUp') {
+			e.preventDefault();
+			const next = histIdx + 1;
+			if (next < cmdHistory.length) { histIdx = next; input = cmdHistory[next] ?? ''; }
+		} else if (e.key === 'ArrowDown') {
+			e.preventDefault();
+			const next = histIdx - 1;
+			if (next < 0) { histIdx = -1; input = ''; }
+			else { histIdx = next; input = cmdHistory[next] ?? ''; }
 		}
 	}
 </script>
@@ -154,22 +225,48 @@
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
 	bind:this={terminalEl}
-	style="flex:1;background:#0c0d10;color:var(--text-0);font-family:var(--font-mono);font-size:12px;padding:14px 18px;overflow:auto"
-	onclick={() => inputEl?.focus()}
+	style="position:relative;flex:1;background:#0c0d10;color:var(--text-0);font-family:var(--font-mono);font-size:12px;padding:14px 18px;overflow:auto"
+	onclick={(e) => { if (!matrixActive) { e.stopPropagation(); inputEl?.focus(); } }}
 >
 	{#each history as line, i (i)}
-		<div style="color:{line.kind === 'in' ? 'var(--accent)' : line.kind === 'err' ? '#d77860' : line.kind === 'sys' ? 'var(--text-2)' : 'var(--text-1)'};white-space:pre-wrap;line-height:1.55">
-			{line.text || ' '}
+		<div
+			style="color:{line.kind === 'in'
+				? 'var(--accent)'
+				: line.kind === 'err'
+					? '#d77860'
+					: line.kind === 'sys'
+						? 'var(--text-2)'
+						: 'var(--text-1)'};white-space:pre-wrap;line-height:1.55"
+		>
+			{line.text || ' '}
 		</div>
 	{/each}
-	<div style="display:flex;gap:8px;margin-top:4px">
-		<span style="color:var(--accent)">~/$</span>
-		<input
-			bind:this={inputEl}
-			bind:value={input}
-			onkeydown={handleKeyDown}
-			style="flex:1;background:transparent;border:0;outline:0;color:var(--text-0);font-family:var(--font-mono);font-size:12px"
-			aria-label="Terminal input"
-		/>
-	</div>
+
+	{#if !matrixActive}
+		<div style="display:flex;gap:8px;margin-top:4px">
+			<span style="color:var(--accent);white-space:nowrap">{cwdLabel(cwd)}/$</span>
+			<input
+				bind:this={inputEl}
+				bind:value={input}
+				onkeydown={handleKeyDown}
+				autocomplete="off"
+				data-1p-ignore
+				data-lpignore="true"
+				data-form-type="other"
+				style="flex:1;background:transparent;border:0;outline:0;color:var(--text-0);font-family:var(--font-mono);font-size:12px"
+				aria-label="Terminal input"
+			/>
+		</div>
+	{/if}
+
+	{#if matrixActive}
+		<canvas
+			bind:this={canvasEl}
+			style="position:absolute;inset:0;width:100%;height:100%;display:block;cursor:crosshair"
+			onclick={stopMatrix}
+		></canvas>
+		<div style="position:absolute;bottom:18px;right:18px;color:var(--text-2);font-size:11px;pointer-events:none">
+			Ctrl+C or click to stop
+		</div>
+	{/if}
 </div>
