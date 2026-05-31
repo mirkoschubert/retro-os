@@ -3,7 +3,8 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import { systemStore } from '$lib/stores/system.svelte.js';
 	import { onMount } from 'svelte';
-	import { UmamiAnalyticsEnv } from '@lukulent/svelte-umami';
+	import { UmamiAnalytics } from '@lukulent/svelte-umami';
+	import { PUBLIC_UMAMI_SRC, PUBLIC_UMAMI_WEBSITE_ID } from '$env/static/public';
 
 	let { children } = $props();
 	let updateReady = $state(false);
@@ -28,7 +29,7 @@
 	<title>RetroOS - mirkoschubert</title>
 </svelte:head>
 
-<UmamiAnalyticsEnv />
+<UmamiAnalytics srcURL={PUBLIC_UMAMI_SRC} websiteID={PUBLIC_UMAMI_WEBSITE_ID} />
 
 {@render children()}
 
