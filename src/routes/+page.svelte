@@ -33,6 +33,17 @@
 		systemStore.setLang(_serverLang);
 	}
 
+	// Apply era from URL param on cross-domain lang switch, then clean the URL
+	if (typeof window !== 'undefined') {
+		const url = new URL(window.location.href);
+		const eraParam = url.searchParams.get('era');
+		if (eraParam === 'graphite' || eraParam === 'atelier' || eraParam === 'workbench') {
+			systemStore.setEra(eraParam);
+			url.searchParams.delete('era');
+			history.replaceState(null, '', url.pathname + (url.searchParams.toString() ? '?' + url.searchParams.toString() : ''));
+		}
+	}
+
 	function switchLang(target: 'en' | 'de') {
 		if (typeof window === 'undefined') return;
 		const host = window.location.hostname;
@@ -43,7 +54,8 @@
 			return;
 		}
 		const targetHost = target === 'de' ? 'mirkoschubert.de' : 'mirkoschubert.com';
-		window.location.href = `https://${targetHost}${window.location.pathname}`;
+		const era = systemStore.era;
+		window.location.href = `https://${targetHost}${window.location.pathname}?era=${era}`;
 	}
 
 	let viewportH = $state(800);
