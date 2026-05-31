@@ -51,7 +51,7 @@
 			<div class="boot-title">{m.app_name()}</div>
 			<div class="boot-version" style="margin-top:4px">{m.about_version()}</div>
 		</div>
-		<div class="boot-log" style="width:100%">{#each bootMsgs.slice(0, shown) as msg}<div><span class="ok">●</span> {msg}</div>{/each}{#if shown < bootMsgs.length}<div class="dim">_</div>{/if}</div>
+		<div class="boot-log" style="width:100%">{#each bootMsgs.slice(0, shown) as msg, i (i)}<div><span class="ok">●</span> {msg}</div>{/each}{#if shown < bootMsgs.length}<div class="dim">_</div>{/if}</div>
 	</div>
 	<div class="boot-skip">{m.skip_hint()}</div>
 </div>

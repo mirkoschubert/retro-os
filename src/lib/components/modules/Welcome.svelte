@@ -68,7 +68,7 @@
 				onmouseleave={(e) => (e.currentTarget.style.borderColor = 'var(--line-1)')}
 			>
 				<span style="display:inline-flex;align-items:center;gap:2px;flex-shrink:0">
-					{#each sc.kbd.split('') as ch}
+					{#each sc.kbd.split('') as ch (ch)}
 						<KbdKey token={ch === '⌘' ? 'cmd' : ch === '⇧' ? 'shift' : ch === '⌃' ? 'ctrl' : ch === '⌥' ? 'alt' : ch} />
 					{/each}
 				</span>
@@ -79,6 +79,6 @@
 	</div>
 
 	<div class="mono dim" style="font-size:10.5px;margin-top:22px;letter-spacing:0.06em">
-		{t.available()}: {availableFor} · <span style="color:var(--accent)">{email}</span>
+		{t.available()}: {availableFor} · <a href="mailto:{email}" style="color:var(--accent);text-decoration:none">{email}</a>
 	</div>
 </div>

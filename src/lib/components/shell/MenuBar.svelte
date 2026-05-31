@@ -67,9 +67,9 @@
 				{ row: t.preferences(), shortcut: '⌘,', on: () => { openKey = null; onOpenModule('sysinfo'); } },
 				{ divider: true },
 				{ label: t.theme() },
-				{ row: t.era_graphite(), checked: era === 'graphite', on: () => { onSetEra('graphite'); openKey = null; } },
-				{ row: t.era_atelier(), checked: era === 'atelier', on: () => { onSetEra('atelier'); openKey = null; } },
 				{ row: t.era_workbench(), checked: era === 'workbench', on: () => { onSetEra('workbench'); openKey = null; } },
+				{ row: t.era_atelier(), checked: era === 'atelier', on: () => { onSetEra('atelier'); openKey = null; } },
+				{ row: t.era_graphite(), checked: era === 'graphite', on: () => { onSetEra('graphite'); openKey = null; } },
 				{ divider: true },
 				{ label: t.language() },
 				{ row: t.lang_en(), checked: lang === 'en', on: () => { onSetLang('en'); openKey = null; } },
@@ -189,7 +189,7 @@
 								<span class="menu-check">{#if d.checked}<Check size={11} strokeWidth={2.5} />{/if}</span>
 								<span class="menu-label">{d.row}</span>
 								{#if d.shortcut}
-									<span class="shortcut">{#each d.shortcut.split('') as ch}<KbdKey token={ch === '⌘' ? 'cmd' : ch === '⇧' ? 'shift' : ch === '⌃' ? 'ctrl' : ch === '⌥' ? 'alt' : ch} />{/each}</span>
+									<span class="shortcut">{#each d.shortcut.split('') as ch (ch)}<KbdKey token={ch === '⌘' ? 'cmd' : ch === '⇧' ? 'shift' : ch === '⌃' ? 'ctrl' : ch === '⌥' ? 'alt' : ch} />{/each}</span>
 								{/if}
 							</div>
 						{/if}

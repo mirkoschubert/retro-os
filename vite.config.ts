@@ -38,6 +38,7 @@ export default defineConfig({
 			workbox: {
 				globPatterns: ['**/*.{js,css,svg,png,woff,woff2}'],
 				navigateFallback: null,
+				maximumFileSizeToCacheInBytes: 5 * 1024 * 1024,
 				runtimeCaching: [
 					{
 						// Sanity image CDN — force-cache despite Cache-Control: private

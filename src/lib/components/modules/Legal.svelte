@@ -46,38 +46,43 @@
 				<h3>Verantwortlich</h3>
 				<p>
 					Mirko Schubert<br />
-					<!-- TODO: Straße und Hausnummer --><br />
-					<!-- TODO: PLZ und Stadt --><br />
+					Anzengruberstr. 28<br />
+					21079 Hamburg<br />
 					Deutschland
 				</p>
 
 				<h3>Kontakt</h3>
 				<p>
+					Telefon: <a href="tel:+491746057248">+49 174 6057248</a><br />
 					E-Mail: <a href="mailto:office@mirkoschubert.de">office@mirkoschubert.de</a>
 				</p>
-
-				<h3>Hinweis zur Online-Streitbeilegung</h3>
 				<p>
-					Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:
-					<a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer">
-						ec.europa.eu/consumers/odr
-					</a>.<br />
-					Ich bin nicht verpflichtet und nicht bereit, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
+					Für verschlüsselte Kommunikation steht ein PGP/GPG-Schlüssel zur Verfügung.<br />
+					Fingerprint: <span class="mono">0E47 02A9 E550 6C4D 35CD 3523 1411 0F3D 8B09 7056</span>
 				</p>
 
-				<h3>Haftung für Inhalte</h3>
+				<h3>Umsatzsteuer</h3>
 				<p>
-					Als Diensteanbieter bin ich gemäß §7 Abs.1 TMG für eigene Inhalte auf diesen Seiten nach
-					den allgemeinen Gesetzen verantwortlich. Nach §§8 bis 10 TMG bin ich als Diensteanbieter
-					jedoch nicht verpflichtet, übermittelte oder gespeicherte fremde Informationen zu
-					überwachen oder nach Umständen zu forschen, die auf eine rechtswidrige Tätigkeit
-					hinweisen.
+					Ich bin Kleinunternehmer im Sinne von §19 UStG. Es wird daher keine Umsatzsteuer
+					ausgewiesen.
+				</p>
+
+				<h3>Inhaltlich Verantwortlicher</h3>
+				<p>
+					Inhaltlich verantwortlich gemäß §18 Abs. 2 MStV:<br />
+					Mirko Schubert, Anzengruberstr. 28, 21079 Hamburg
 				</p>
 
 				<h3>Urheberrecht</h3>
 				<p>
 					Die durch mich erstellten Inhalte und Werke auf diesen Seiten unterliegen dem deutschen
 					Urheberrecht. Alle Rechte vorbehalten.
+				</p>
+				<p>
+					Diese Website verwendet Icons aus der <strong>Lucide</strong>-Bibliothek, lizenziert unter
+					der ISC-Lizenz. Copyright (c) 2026 Lucide Icons and Contributors. Ein Teil der Icons
+					basiert auf dem Feather-Projekt, lizenziert unter der MIT-Lizenz. Copyright (c) 2013-present
+					Cole Bemis.
 				</p>
 			{:else}
 				<h2>Imprint</h2>
@@ -86,19 +91,47 @@
 				<h3>Responsible</h3>
 				<p>
 					Mirko Schubert<br />
-					<!-- TODO: Street and number --><br />
-					<!-- TODO: ZIP and city --><br />
+					Anzengruberstr. 28<br />
+					21079 Hamburg<br />
 					Germany
 				</p>
 
 				<h3>Contact</h3>
 				<p>
+					Phone: <a href="tel:+491746057248">+49 174 6057248</a><br />
 					Email: <a href="mailto:office@mirkoschubert.de">office@mirkoschubert.de</a>
+				</p>
+				<p>
+					A PGP/GPG key is available for encrypted communication.<br />
+					Fingerprint: <span class="mono">0E47 02A9 E550 6C4D 35CD 3523 1411 0F3D 8B09 7056</span>
+				</p>
+
+				<h3>VAT</h3>
+				<p>
+					Operating as a small business under §19 UStG (German VAT Act). No VAT is charged.
+				</p>
+
+				<h3>Editorial responsibility</h3>
+				<p>
+					Responsible for content according to §18 para. 2 MStV (German Interstate Media Treaty):<br />
+					Mirko Schubert, Anzengruberstr. 28, 21079 Hamburg, Germany
+				</p>
+
+				<h3>Copyright</h3>
+				<p>
+					All content and works on this site created by me are subject to German copyright law.
+					All rights reserved.
+				</p>
+				<p>
+					This website uses icons from the <strong>Lucide</strong> library, licensed under the ISC
+					License. Copyright (c) 2026 Lucide Icons and Contributors. A subset of icons is derived
+					from the Feather project, licensed under the MIT License. Copyright (c) 2013-present
+					Cole Bemis.
 				</p>
 
 				<p class="legal-note">
-					This imprint is governed by German law. The authoritative version is available on
-					mirkoschubert.de (German).
+					This imprint is governed by German law. The authoritative version is available in German
+					on mirkoschubert.de.
 				</p>
 			{/if}
 		{:else}
@@ -106,7 +139,12 @@
 				<h2>Datenschutzerklärung</h2>
 
 				<h3>Verantwortlicher</h3>
-				<p>Mirko Schubert, office@mirkoschubert.de</p>
+				<p>
+					Mirko Schubert<br />
+					Anzengruberstr. 28<br />
+					21079 Hamburg<br />
+					E-Mail: <a href="mailto:office@mirkoschubert.de">office@mirkoschubert.de</a>
+				</p>
 
 				<h3>Erhobene Daten</h3>
 				<p>
@@ -144,19 +182,29 @@
 				<h3>Rechte der Nutzer</h3>
 				<p>
 					Du hast das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung
-					deiner Daten sowie das Recht auf Datenübertragbarkeit. Kontakt: office@mirkoschubert.de
+					deiner Daten sowie das Recht auf Datenübertragbarkeit (Art. 15-20 DSGVO). Kontakt:
+					<a href="mailto:office@mirkoschubert.de">office@mirkoschubert.de</a>
 				</p>
 
 				<h3>Beschwerderecht</h3>
 				<p>
-					Du hast das Recht, dich bei einer Aufsichtsbehörde zu beschweren. In NRW ist dies die
-					Landesbeauftragte für Datenschutz und Informationsfreiheit (LDI NRW).
+					Du hast das Recht, dich bei einer Datenschutz-Aufsichtsbehörde zu beschweren. Zuständig
+					ist der Hamburgische Beauftragte für Datenschutz und Informationsfreiheit (HmbBfDI),
+					Ludwig-Erhard-Str. 22, 20459 Hamburg,
+					<a href="https://datenschutz.hamburg.de" target="_blank" rel="noopener noreferrer"
+						>datenschutz.hamburg.de</a
+					>.
 				</p>
 			{:else}
 				<h2>Privacy Policy</h2>
 
 				<h3>Controller</h3>
-				<p>Mirko Schubert, office@mirkoschubert.de</p>
+				<p>
+					Mirko Schubert<br />
+					Anzengruberstr. 28<br />
+					21079 Hamburg, Germany<br />
+					Email: <a href="mailto:office@mirkoschubert.de">office@mirkoschubert.de</a>
+				</p>
 
 				<h3>Data collected</h3>
 				<p>
@@ -192,8 +240,19 @@
 
 				<h3>Your rights</h3>
 				<p>
-					You have the right to access, rectify, delete, and restrict processing of your data.
-					Contact: office@mirkoschubert.de
+					You have the right to access, rectify, delete, and restrict the processing of your data,
+					as well as the right to data portability (Art. 15-20 GDPR). Contact:
+					<a href="mailto:office@mirkoschubert.de">office@mirkoschubert.de</a>
+				</p>
+
+				<h3>Right to complain</h3>
+				<p>
+					You have the right to lodge a complaint with a data protection supervisory authority. The
+					competent authority is the Hamburg Commissioner for Data Protection and Freedom of
+					Information (HmbBfDI), Ludwig-Erhard-Str. 22, 20459 Hamburg,
+					<a href="https://datenschutz.hamburg.de" target="_blank" rel="noopener noreferrer"
+						>datenschutz.hamburg.de</a
+					>.
 				</p>
 
 				<p class="legal-note">
@@ -281,6 +340,12 @@
 
 	.legal-body a:hover {
 		text-decoration: underline;
+	}
+
+	.mono {
+		font-family: var(--font-mono);
+		font-size: 11px;
+		word-break: break-all;
 	}
 
 	.legal-note {

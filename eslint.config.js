@@ -37,8 +37,11 @@ export default defineConfig(
 		}
 	},
 	{
-		// Override or add rule settings here, such as:
-		// 'svelte/button-has-type': 'error'
-		rules: {}
+		rules: {
+			// All flagged hrefs are external links (target="_blank") — not SvelteKit navigation
+			'svelte/no-navigation-without-resolve': 'off',
+			// Allow underscore-prefixed variables to signal intentionally unused bindings
+			'@typescript-eslint/no-unused-vars': ['error', { varsIgnorePattern: '^_', argsIgnorePattern: '^_' }]
+		}
 	}
 );

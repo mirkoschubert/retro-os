@@ -34,12 +34,6 @@ export const photoSeries = defineType({
 				{ name: 'de', type: 'text', title: 'Deutsch', rows: 2 }
 			]
 		}),
-		defineField({
-			name: 'tags',
-			title: 'Tags',
-			type: 'array',
-			of: [{ type: 'string' }]
-		})
 	],
 	preview: {
 		select: { title: 'title.en', subtitle: 'date' }

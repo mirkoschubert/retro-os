@@ -19,14 +19,14 @@ function detectInitialLang(): Lang {
 }
 
 function detectInitialEra(): Era {
-	if (typeof window === 'undefined') return 'graphite';
+	if (typeof window === 'undefined') return 'workbench';
 	try {
 		const saved = localStorage.getItem('retro-os.era');
 		if (saved === 'graphite' || saved === 'atelier' || saved === 'workbench') return saved;
 	} catch {
 		// ignore
 	}
-	return 'graphite';
+	return 'workbench';
 }
 
 function detectBootDone(): boolean {

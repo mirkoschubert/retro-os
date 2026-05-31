@@ -1,3 +1,4 @@
+// @ts-nocheck - this file uses react/jsx deps managed by studio's own node_modules
 import { defineType, defineField } from 'sanity';
 import { ExifImageInput } from '../components/ExifImageInput';
 

@@ -20,48 +20,18 @@ export const photo = defineType({
 			type: 'image',
 			options: { hotspot: true }
 		}),
-		defineField({
-			name: 'date',
-			title: 'Date',
-			type: 'date'
-		}),
+		defineField({ name: 'date', title: 'Date', type: 'date' }),
 		defineField({
 			name: 'series',
 			title: 'Series',
 			type: 'reference',
 			to: [{ type: 'photoSeries' }]
 		}),
-		defineField({
-			name: 'camera',
-			title: 'Camera',
-			type: 'string'
-		}),
-		defineField({
-			name: 'lens',
-			title: 'Lens',
-			type: 'string'
-		}),
-		defineField({
-			name: 'iso',
-			title: 'ISO',
-			type: 'number'
-		}),
-		defineField({
-			name: 'shutter',
-			title: 'Shutter Speed',
-			type: 'string'
-		}),
-		defineField({
-			name: 'aperture',
-			title: 'Aperture',
-			type: 'string'
-		}),
-		defineField({
-			name: 'tags',
-			title: 'Tags',
-			type: 'array',
-			of: [{ type: 'string' }]
-		})
+		defineField({ name: 'camera', title: 'Camera', type: 'string' }),
+		defineField({ name: 'lens', title: 'Lens', type: 'string' }),
+		defineField({ name: 'iso', title: 'ISO', type: 'number' }),
+		defineField({ name: 'shutter', title: 'Shutter Speed', type: 'string' }),
+		defineField({ name: 'aperture', title: 'Aperture', type: 'string' })
 	],
 	preview: {
 		select: { title: 'title.en', media: 'image', subtitle: 'date' }

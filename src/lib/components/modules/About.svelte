@@ -2,11 +2,7 @@
 	import { SYS } from '$lib/data/placeholder.js';
 	import { systemStore } from '$lib/stores/system.svelte.js';
 
-	interface Props {
-		winId?: string;
-	}
-
-	const {}: Props = $props();
+	const { winId: _winId }: { winId?: string } = $props();
 	const lang = $derived(systemStore.lang);
 </script>
 

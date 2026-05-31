@@ -172,7 +172,7 @@
 					{#if detailProject.images && detailProject.images.length > 0}
 						<div style="margin-top:28px;display:grid;grid-template-columns:repeat({detailProject.images.length}, 1fr);gap:14px">
 							{#each detailProject.images as img, i (i)}
-								<div class="ph-image cover-image project-cover" style="height:180px">
+								<div class="ph-image cover-image project-cover project-detail-img" style="height:180px">
 									<img
 										src={urlFor(img).width(800).height(360).fit('crop').auto('format').url()}
 										alt="{pickLocale(lang, detailProject.title)} - detail {i + 1}"

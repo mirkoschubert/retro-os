@@ -19,7 +19,8 @@ import type {
 	SysInfo
 } from '$lib/sanity/types';
 
-export const load: PageServerLoad = async () => {
+export const load: PageServerLoad = async ({ locals }) => {
+	const initialLang = locals.lang;
 	try {
 		const [projects, writings, publications, albums, photos, photoSeries, sysInfo] =
 			await Promise.all([
@@ -32,9 +33,10 @@ export const load: PageServerLoad = async () => {
 				client.fetch<SysInfo>(sysInfoQuery)
 			]);
 
-		return { projects, writings, publications, albums, photos, photoSeries, sysInfo };
+		return { initialLang, projects, writings, publications, albums, photos, photoSeries, sysInfo };
 	} catch {
 		return {
+			initialLang,
 			projects: [] as Project[],
 			writings: [] as Writing[],
 			publications: [] as Publication[],

@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { getMessages } from '$lib/i18n.js';
 	import { PortableText } from '@portabletext/svelte';
+	import type { InputValue } from '@portabletext/svelte';
 	import { systemStore } from '$lib/stores/system.svelte.js';
 	import { wmStore } from '$lib/stores/wm.svelte.js';
 	import { calcReadingTime, pickLocale } from '$lib/sanity/utils.js';
@@ -67,8 +68,7 @@
 	const readingTime = $derived(
 		selected
 			? calcReadingTime(
-					((selected.body?.[lang] ?? selected.body?.en ?? []) as unknown[]),
-					lang
+					(selected.body?.[lang] ?? selected.body?.en ?? []) as unknown[]
 				)
 			: 1
 	);
@@ -249,7 +249,7 @@
 						</div>
 
 						<div class="writer-body">
-							<PortableText value={bodyBlocks as any} onMissingComponent={false} />
+							<PortableText value={bodyBlocks as InputValue} onMissingComponent={false} />
 						</div>
 
 						<div class="writer-nav mono dim">

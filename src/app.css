@@ -621,7 +621,10 @@ html[data-era="workbench"] .toolbar input { border-radius: 0; }
   z-index: 1;
 }
 .project-cover .cover-img {
-  object-position: top right;
+  object-position: top center;
+}
+.project-detail-img .cover-img {
+  object-position: left center;
 }
 .cover-image .cover-dim {
   position: absolute; inset: 0;

@@ -25,6 +25,14 @@
 
 	const { data }: { data: PageData } = $props();
 
+	// Read initialLang once at module evaluation time — outside any reactive context.
+	// This intentionally captures only the initial server-provided value and must never
+	// re-run on user lang changes. The svelte(state_referenced_locally) warning is expected.
+	const _serverLang = data.initialLang;
+	if (_serverLang && systemStore.lang !== _serverLang) {
+		systemStore.setLang(_serverLang);
+	}
+
 	let viewportH = $state(800);
 
 	let now = $state(new Date());

@@ -61,7 +61,17 @@
 				<div class="mono dim meta-label">{t.location()}</div>
 				<div>{sysInfo?.location ?? '–'}</div>
 				<div class="mono dim meta-label">{t.contact()}</div>
-				<div><span class="mono accent">{sysInfo?.email ?? '–'}</span></div>
+				<div>
+					<a href="mailto:{sysInfo?.email ?? ''}" class="mono accent contact-link">
+						{sysInfo?.email ?? '–'}
+					</a>
+				</div>
+				<div class="mono dim meta-label">Support</div>
+				<div>
+					<a href="https://buymeacoffee.com/musikuss" target="_blank" rel="noopener noreferrer" class="mono accent contact-link">
+						Buy me a coffee
+					</a>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -77,7 +87,7 @@
 		<div class="mono dim si-label">{t.stack()}</div>
 		{#if sysInfo?.stack && sysInfo.stack.length > 0}
 			<div class="tag-list">
-				{#each sysInfo.stack as item}
+				{#each sysInfo.stack as item (item)}
 					<span class="tag">{item}</span>
 				{/each}
 			</div>
@@ -214,6 +224,14 @@
 
 	.accent {
 		color: var(--accent);
+	}
+
+	.contact-link {
+		text-decoration: none;
+		color: var(--accent);
+	}
+	.contact-link:hover {
+		text-decoration: underline;
 	}
 
 	.divider {

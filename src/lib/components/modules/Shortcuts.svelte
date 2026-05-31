@@ -3,11 +3,7 @@
 	import { systemStore } from '$lib/stores/system.svelte.js';
 	import KbdKey from '$lib/components/ui/KbdKey.svelte';
 
-	interface Props {
-		winId?: string;
-	}
-
-	const {}: Props = $props();
+	const { winId: _winId }: { winId?: string } = $props();
 	const lang = $derived(systemStore.lang);
 	const t = $derived(getMessages(lang));
 
@@ -66,13 +62,13 @@
 		<span class="sc-title mono">{t.shortcuts_title()}</span>
 	</div>
 	<div class="sc-body">
-		{#each sections as section}
+		{#each sections as section, si (si)}
 			<div class="sc-section">
 				<div class="sc-section-heading">{section.heading()}</div>
-				{#each section.entries as entry}
+				{#each section.entries as entry, ei (ei)}
 					<div class="sc-row">
 						<div class="sc-keys">
-							{#each entry.keys as key, i}
+							{#each entry.keys as key, i (i)}
 								{#if i > 0}<span class="sc-plus">+</span>{/if}
 								<KbdKey token={key} />
 							{/each}

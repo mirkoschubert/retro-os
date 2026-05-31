@@ -4,12 +4,12 @@
 	import type { Lang, Era } from '$lib/stores/system.svelte.js';
 	import type { Project, Writing, Photo, Album, Publication } from '$lib/sanity/types.js';
 	import {
-		LayoutDashboard, Disc, Camera, BookOpen, Newspaper, Info, SquareTerminal,
+		LayoutDashboard, Newspaper,
 		Settings, FolderOpen, Image, Music2, FileText,
-		ArrowUp, ArrowDown, CornerDownLeft, X as IconX
+		ArrowUp, ArrowDown, CornerDownLeft
 	} from '@lucide/svelte';
 
-	const kindIcon: Record<string, unknown> = {
+	const kindIcon: Record<string, typeof LayoutDashboard> = {
 		PROG: LayoutDashboard, PROJ: FolderOpen, TEXT: FileText,
 		PHOT: Image, MUSC: Music2, PUB: Newspaper, PREF: Settings
 	};
@@ -174,7 +174,7 @@
 						tabindex="0"
 					>
 						<span class="row-icon">
-							{#if kindIcon[item.kind]}{@const Icon = kindIcon[item.kind] as any}<Icon size={13} strokeWidth={1.6} />{:else}{item.kind[0]}{/if}
+							{#if kindIcon[item.kind]}{@const Icon = kindIcon[item.kind]}<Icon size={13} strokeWidth={1.6} />{:else}{item.kind[0]}{/if}
 						</span>
 						<span style="flex:1">
 							{item.label}

@@ -9,7 +9,7 @@ export function urlForAudioFile(ref: string): string {
 	return `https://cdn.sanity.io/files/${projectId}/${dataset}/${hash}.${extension}`;
 }
 
-export function calcReadingTime(blocks: unknown[], _lang: 'en' | 'de'): number {
+export function calcReadingTime(blocks: unknown[]): number {
 	if (!blocks || blocks.length === 0) return 1;
 	let text = '';
 	for (const block of blocks) {
