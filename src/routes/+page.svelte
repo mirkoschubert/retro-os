@@ -33,6 +33,19 @@
 		systemStore.setLang(_serverLang);
 	}
 
+	function switchLang(target: 'en' | 'de') {
+		if (typeof window === 'undefined') return;
+		const host = window.location.hostname;
+		const isLocal = host === 'localhost' || host.startsWith('127.') || host.startsWith('192.');
+		if (isLocal) {
+			// In local dev: just toggle the store, no domain switch
+			systemStore.setLang(target);
+			return;
+		}
+		const targetHost = target === 'de' ? 'mirkoschubert.de' : 'mirkoschubert.com';
+		window.location.href = `https://${targetHost}${window.location.pathname}`;
+	}
+
 	let viewportH = $state(800);
 
 	let now = $state(new Date());
@@ -374,7 +387,7 @@
 				case 'l':
 				case 'L':
 					e.preventDefault();
-					systemStore.setLang(systemStore.lang === 'de' ? 'en' : 'de');
+					switchLang(systemStore.lang === 'de' ? 'en' : 'de');
 					break;
 				case '`':
 					e.preventDefault();
@@ -434,7 +447,7 @@
 		focusedTitle={focusedTitle()}
 		time={formatNow(now)}
 		viewOptions={viewOptions()}
-		onSetLang={(l) => systemStore.setLang(l)}
+		onSetLang={(l) => switchLang(l)}
 		onSetEra={(e) => systemStore.setEra(e)}
 		onOpenAbout={() => openModule('about')}
 		onOpenModule={openModule}
@@ -458,7 +471,7 @@
 		lang={systemStore.lang}
 		onClose={() => systemStore.closePalette()}
 		onOpenModule={openModule}
-		onSetLang={(l) => systemStore.setLang(l)}
+		onSetLang={(l) => switchLang(l)}
 		onSetEra={(e) => systemStore.setEra(e)}
 		projects={data.projects}
 		writings={data.writings}
