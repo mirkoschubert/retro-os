@@ -37,9 +37,18 @@
 	if (typeof window !== 'undefined') {
 		const url = new URL(window.location.href);
 		const eraParam = url.searchParams.get('era');
+		const wmParam = url.searchParams.get('wm');
 		if (eraParam === 'graphite' || eraParam === 'atelier' || eraParam === 'workbench') {
 			systemStore.setEra(eraParam);
+		}
+		if (wmParam) {
+			try {
+				localStorage.setItem('retro-os:wm', atob(wmParam));
+			} catch { /* ignore malformed param */ }
+		}
+		if (eraParam || wmParam) {
 			url.searchParams.delete('era');
+			url.searchParams.delete('wm');
 			history.replaceState(null, '', url.pathname + (url.searchParams.toString() ? '?' + url.searchParams.toString() : ''));
 		}
 	}
@@ -49,13 +58,15 @@
 		const host = window.location.hostname;
 		const isLocal = host === 'localhost' || host.startsWith('127.') || host.startsWith('192.');
 		if (isLocal) {
-			// In local dev: just toggle the store, no domain switch
 			systemStore.setLang(target);
 			return;
 		}
 		const targetHost = target === 'de' ? 'mirkoschubert.de' : 'mirkoschubert.com';
 		const era = systemStore.era;
-		window.location.href = `https://${targetHost}${window.location.pathname}?era=${era}`;
+		const wmRaw = localStorage.getItem('retro-os:wm');
+		const wm = wmRaw ? btoa(wmRaw) : null;
+		const query = wm ? `era=${era}&wm=${encodeURIComponent(wm)}` : `era=${era}`;
+		window.location.href = `https://${targetHost}${window.location.pathname}?${query}`;
 	}
 
 	let viewportH = $state(800);
