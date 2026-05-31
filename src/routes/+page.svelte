@@ -20,6 +20,7 @@
 	import Legal from '$lib/components/modules/Legal.svelte';
 	import Shortcuts from '$lib/components/modules/Shortcuts.svelte';
 	import NotificationCenter from '$lib/components/shell/NotificationCenter.svelte';
+	import { trackEvent } from '@lukulent/svelte-umami';
 	import type { Component } from 'svelte';
 	import type { PageData } from './$types';
 
@@ -320,6 +321,7 @@
 					: undefined
 			}
 		);
+		trackEvent('module-open', { module: id });
 	}
 
 	function measureDesktop() {

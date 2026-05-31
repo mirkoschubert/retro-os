@@ -1,42 +1,78 @@
-# sv
+# retro-os
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Personal portfolio of Mirko Schubert, running on [mirkoschubert.de](https://mirkoschubert.de) (German) and [mirkoschubert.com](https://mirkoschubert.com) (English).
 
-## Creating a project
+A single SvelteKit app delivered on two domains. The domain is the primary language signal - no separate deployments, no URL prefixes.
 
-If you're seeing this, you've probably already done this step. Congrats!
+The interface is a fictional dark retro creative system inspired by Mac System 7, Amiga Workbench, and NeXTSTEP - not a 1:1 recreation, but a reinterpretation as a usable portfolio shell. Content areas appear as programs/modules inside a windowed desktop environment.
 
-```sh
-# create a new project
-npx sv create my-app
-```
+## Stack
 
-To recreate this project with the same configuration:
+- **Framework:** SvelteKit + Svelte 5 (runes)
+- **Styling:** CSS custom properties, no UI framework
+- **i18n:** inlang/paraglide-js (compile-time, domain-based)
+- **CMS:** Sanity Studio (monorepo workspace at `studio/`)
+- **Analytics:** Umami (self-hosted, privacy-respecting)
+- **PWA:** vite-plugin-pwa + Workbox
+- **Hosting:** Vercel
 
-```sh
-# recreate this project
-pnpm dlx sv@0.15.1 create --template minimal --types ts --add prettier eslint vitest="usages:unit,component" --install pnpm mirkoschubert.com-retro
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+## Setup
 
 ```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+pnpm install
 ```
 
-## Building
-
-To create a production version of your app:
+Copy `.env.example` to `.env` and fill in the required values:
 
 ```sh
-npm run build
+cp .env.example .env
 ```
 
-You can preview the production build with `npm run preview`.
+Required variables:
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+| Variable | Description |
+|---|---|
+| `PUBLIC_SANITY_PROJECT_ID` | Sanity project ID |
+| `PUBLIC_SANITY_DATASET` | Sanity dataset name |
+| `PUBLIC_UMAMI_SRC_URL` | Umami script URL |
+| `PUBLIC_UMAMI_WEBSITE_ID` | Umami website ID |
+
+## Development
+
+```sh
+pnpm dev
+```
+
+The app runs on `localhost`. Language detection falls back to browser language when running locally (not domain-based).
+
+To also run the Sanity Studio:
+
+```sh
+# in studio/
+pnpm dev
+```
+
+The studio is a separate pnpm workspace package and has its own `package.json`.
+
+## Build
+
+```sh
+pnpm build
+pnpm preview
+```
+
+Deployed automatically via Vercel on push to `main`.
+
+## Architecture
+
+The app is structured in three layers:
+
+- **Shell layer** - global layout, menubar, dock, command palette, window manager (`src/lib/stores/wm.svelte.ts`)
+- **Program layer** - individual modules (ProjectBrowser, MediaPlayer, Darkroom, Writer, SysInfo, Archive) in `src/lib/components/modules/`
+- **Content layer** - Sanity queries and locale-aware data fetching in `src/lib/sanity/`
+
+Modules are opened via `openModule(id)` in `src/routes/+page.svelte`, which creates a managed window entry in the window store. Each opened module fires a `module-open` analytics event.
+
+## License
+
+MIT - see [LICENSE](LICENSE)

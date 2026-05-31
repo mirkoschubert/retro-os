@@ -173,10 +173,18 @@
 
 				<h3>Keine Cookies, kein Tracking</h3>
 				<p>
-					Diese Website setzt keine Tracking-Cookies und verwendet keine Analyse-Dienste (kein
-					Google Analytics, kein Matomo o.ä.). Im localStorage des Browsers werden
+					Diese Website setzt keine Tracking-Cookies. Im localStorage des Browsers werden
 					Benutzereinstellungen gespeichert (Sprache, Theme, Fensterzustand). Diese Daten verlassen
 					das Gerät nicht.
+				</p>
+
+				<h3>Web-Analyse (Umami)</h3>
+				<p>
+					Diese Website verwendet Umami Analytics, einen datenschutzkonformen Analyse-Dienst. Umami
+					erhebt keine personenbezogenen Daten, setzt keine Cookies und erstellt keine
+					Cross-Site-Profile. Es wird lediglich aggregiertes Nutzungsverhalten erfasst (z.B. welche
+					Bereiche der Website aufgerufen werden). Die Daten werden auf einer selbst betriebenen
+					Instanz gespeichert und nicht an Dritte weitergegeben.
 				</p>
 
 				<h3>Rechte der Nutzer</h3>
@@ -233,9 +241,16 @@
 
 				<h3>No cookies, no tracking</h3>
 				<p>
-					This website sets no tracking cookies and uses no analytics services. User preferences
-					(language, theme, window state) are stored in the browser's localStorage and never leave
-					your device.
+					This website sets no tracking cookies. User preferences (language, theme, window state)
+					are stored in the browser's localStorage and never leave your device.
+				</p>
+
+				<h3>Web analytics (Umami)</h3>
+				<p>
+					This website uses Umami Analytics, a privacy-respecting analytics service. Umami does not
+					collect personal data, sets no cookies, and builds no cross-site profiles. Only aggregated
+					usage data is recorded (e.g. which areas of the site are visited). Data is stored on a
+					self-hosted instance and is not shared with third parties.
 				</p>
 
 				<h3>Your rights</h3>
